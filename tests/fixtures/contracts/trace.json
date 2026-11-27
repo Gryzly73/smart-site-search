@@ -1,0 +1,83 @@
+[
+  {
+    "schema_version": "1.0",
+    "event_id": "fixture-event-1",
+    "event_type": "request_received",
+    "request_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "session_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "seq": 1,
+    "occurred_at": "2026-11-27T01:00:00+00:00",
+    "received_at": "2026-11-27T01:00:00+00:00",
+    "catalog_version": "synthetic-ui",
+    "app_version": "0.1.0",
+    "provenance": {
+      "catalog_data": "synthetic_fixture",
+      "profile_mock": false,
+      "business_signals_mock": false,
+      "replay": false,
+      "behavior_mock": true
+    },
+    "payload": {
+      "client_request_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "query_redacted": "[скрыто]",
+      "normalized_query": null,
+      "expected_revision": 0,
+      "request_kind": "new_session"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": "fixture-event-2",
+    "event_type": "interpretation_completed",
+    "request_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "session_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "seq": 2,
+    "occurred_at": "2026-11-27T01:00:00+00:00",
+    "received_at": "2026-11-27T01:00:00+00:00",
+    "catalog_version": "synthetic-ui",
+    "app_version": "0.1.0",
+    "provenance": {
+      "catalog_data": "synthetic_fixture",
+      "profile_mock": false,
+      "business_signals_mock": false,
+      "replay": false,
+      "behavior_mock": true
+    },
+    "payload": {
+      "mode": "functional",
+      "role_ids": [
+        "backup_restore"
+      ],
+      "interpretation_source": "degraded_rules"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": "fixture-event-3",
+    "event_type": "response_completed",
+    "request_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "session_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "seq": 3,
+    "occurred_at": "2026-11-27T01:00:00+00:00",
+    "received_at": "2026-11-27T01:00:00+00:00",
+    "catalog_version": "synthetic-ui",
+    "app_version": "0.1.0",
+    "provenance": {
+      "catalog_data": "synthetic_fixture",
+      "profile_mock": false,
+      "business_signals_mock": false,
+      "replay": false,
+      "behavior_mock": true
+    },
+    "payload": {
+      "mode": "functional",
+      "counts": {
+        "primary_full": 1,
+        "primary_partial": 1,
+        "related": 1
+      },
+      "primary_outcome": "full",
+      "latency_ms": 17
+    }
+  }
+]

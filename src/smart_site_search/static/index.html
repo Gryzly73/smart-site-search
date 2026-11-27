@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Умный поиск</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <a class="skip" href="#query">К полю запроса</a>
+  <div class="frame">
+    <header>
+      <div>
+        <p class="eyebrow">Каталог Softline</p>
+        <h1>Умный поиск</h1>
+      </div>
+      <nav>
+        <a href="/analytics">Аналитика</a>
+        <button type="button" id="new-session" class="secondary">Новая сессия</button>
+      </nav>
+    </header>
+    <p id="status" role="status">Напишите, что нужно найти. Диалог хранит сессию в этой вкладке.</p>
+    <main id="thread" class="thread"></main>
+    <form id="composer" class="composer">
+      <label for="query">Свободный запрос</label>
+      <textarea id="query" name="query" rows="2" maxlength="2000" required placeholder="Опишите, что нужно найти"></textarea>
+      <p id="selection" class="selection" hidden></p>
+      <div class="composer-row">
+        <button type="submit" id="send">Найти</button>
+      </div>
+    </form>
+  </div>
+  <script type="module" src="/static/js/search.js"></script>
+</body>
+</html>

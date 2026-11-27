@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Проверка виджета</title>
+  <link rel="stylesheet" href="/static/css/widget.css">
+</head>
+<body>
+  <main class="site">
+    <p class="eyebrow">Чистая страница</p>
+    <h1>Проверка виджета поиска</h1>
+    <p>На странице нет витрины. Диалог открывается кнопкой в углу.</p>
+  </main>
+  <button type="button" id="launcher" aria-expanded="false" aria-controls="panel" aria-label="Открыть чат" title="Открыть чат">
+    <svg viewBox="0 0 6.83 6.83" aria-hidden="true">
+      <path fill="#fff5eb" stroke="#91694a" stroke-width="0.05" d="M3.47 4.87l-1.45.87-.26.16.11-.29c.06-.16.11-.35.14-.54.03-.19.04-.38.04-.54h-.01c-.32-.17-.58-.4-.76-.68-.18-.26-.28-.57-.28-.89 0-.13.02-.27.05-.4.03-.13.09-.25.16-.37.2-.36.52-.64.89-.83.39-.2.85-.3 1.31-.3.46 0 .92.1 1.31.3.38.2.69.48.9.83.07.12.12.25.15.38.04.13.05.26.05.4 0 .12-.01.23-.04.35-.03.12-.07.23-.13.34-.18.37-.49.66-.86.87-.39.21-.85.33-1.31.34z"/>
+      <circle fill="#91694a" cx="2.23" cy="2.95" r="0.28"/>
+      <circle fill="#91694a" cx="3.41" cy="2.95" r="0.28"/>
+      <circle fill="#91694a" cx="4.62" cy="2.95" r="0.28"/>
+    </svg>
+  </button>
+  <section id="panel" class="panel" hidden>
+    <header class="panel-head">
+      <h2>Умный поиск</h2>
+      <div class="head-actions">
+        <button type="button" id="clear" class="icon" hidden aria-label="Очистить историю" title="Очистить историю">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 7.5h14L18 21H6L5 7.5zM15.5 9.5 15 19M12 9.5V19M8.5 9.5 9 19M16 5h3a2 2 0 0 1 2 2v.5H3V7a2 2 0 0 1 2-2h3m8 0-1-2H9L8 5m8 0H8" fill="none" stroke="currentColor" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button type="button" id="close" class="text">Закрыть</button>
+      </div>
+    </header>
+    <div class="operator-bar">
+      <button type="button" id="operator" class="operator">Переключить на оператора</button>
+    </div>
+    <div id="log" class="log" role="log" aria-live="polite"></div>
+    <form id="composer" class="composer">
+      <label class="sr" for="query">Свободный запрос</label>
+      <textarea id="query" rows="2" maxlength="2000" required placeholder="Опишите, что нужно найти"></textarea>
+      <button type="submit" id="send">Отправить</button>
+    </form>
+  </section>
+  <script type="module" src="/static/js/widget.js"></script>
+</body>
+</html>

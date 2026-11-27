@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "from": "2026-11-27T01:00:00+00:00",
+  "to": "2026-11-28T01:00:00+00:00",
+  "generated_at": "2026-11-27T01:00:00+00:00",
+  "cohorts": [
+    {
+      "name": "real",
+      "metrics": [
+        {
+          "metric_id": "ctr",
+          "metric": {
+            "value": null,
+            "numerator": 0,
+            "denominator": 0,
+            "availability": "unavailable",
+            "definition": "Уникальные клики на показанные карточки.",
+            "limitations": [
+              "В выбранном периоде нет показов."
+            ]
+          }
+        }
+      ],
+      "demand": [],
+      "gaps": [],
+      "costs_by_mode": []
+    },
+    {
+      "name": "mock",
+      "metrics": [
+        {
+          "metric_id": "primary_full_rate",
+          "metric": {
+            "value": 0.5,
+            "numerator": 1,
+            "denominator": 2,
+            "availability": "mock",
+            "definition": "Доля full среди запросов с определённым исходом.",
+            "limitations": []
+          }
+        }
+      ],
+      "demand": [
+        {
+          "goal_or_role": "backup_restore",
+          "requests": 2,
+          "sessions": 1
+        }
+      ],
+      "gaps": [
+        {
+          "code": "missing_attributes",
+          "count": 1,
+          "evidence_status": "observed",
+          "recommendation": "Проверить срок лицензии в каталоге."
+        }
+      ],
+      "costs_by_mode": [
+        {
+          "mode": "functional",
+          "requests": 2,
+          "calls": 0,
+          "known_cost": "0",
+          "unknown_calls": 0,
+          "currency": "USD"
+        }
+      ]
+    }
+  ]
+}

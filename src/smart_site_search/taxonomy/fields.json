@@ -1,0 +1,391 @@
+{
+  "vendor_id": {
+    "type": "string",
+    "scope": "card",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "card_id": {
+    "type": "string",
+    "scope": "card",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "kind": {
+    "type": "enum",
+    "scope": "card",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ],
+    "values": [
+      "software",
+      "hardware"
+    ]
+  },
+  "class_id": {
+    "type": "string",
+    "scope": "card",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "role_id": {
+    "type": "string",
+    "scope": "card",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "domestic_hint": {
+    "type": "boolean",
+    "scope": "card",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "saas": {
+    "type": "boolean",
+    "scope": "card",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "registry_number": {
+    "type": "string",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "certificate": {
+    "type": "string",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ],
+    "values": [
+      "fstec",
+      "fsb"
+    ]
+  },
+  "delivery_type": {
+    "type": "enum",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ],
+    "values": [
+      "electronic",
+      "media",
+      "subscription"
+    ]
+  },
+  "customer_type": {
+    "type": "enum",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ],
+    "values": [
+      "legal_entity",
+      "individual"
+    ]
+  },
+  "organization_type": {
+    "type": "enum",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ],
+    "values": [
+      "commercial",
+      "academic",
+      "government",
+      "nonprofit"
+    ]
+  },
+  "license_type": {
+    "type": "enum",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ],
+    "values": [
+      "full",
+      "renewal",
+      "upgrade",
+      "subscription",
+      "support",
+      "trial",
+      "oem"
+    ]
+  },
+  "edition": {
+    "type": "string",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "platform": {
+    "type": "enum",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ],
+    "values": [
+      "virtualization",
+      "virtual_machine",
+      "vmware",
+      "hyper_v",
+      "physical",
+      "windows",
+      "linux",
+      "macos",
+      "android",
+      "ios"
+    ]
+  },
+  "architecture": {
+    "type": "enum",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ],
+    "values": [
+      "x86_64",
+      "x86",
+      "arm64",
+      "arm",
+      "e2k",
+      "mips",
+      "riscv64"
+    ]
+  },
+  "term_months": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "month",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "users": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "user",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "devices": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "device",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "nodes": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "node",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "cores": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "core",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "perpetual": {
+    "type": "boolean",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "available": {
+    "type": "boolean",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "ram_gib": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "GiB",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "ram_gb": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "GB",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "vram_gb": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "GB",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "vram_gib": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "GiB",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "storage_gb": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "GB",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "storage_gib": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "GiB",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "form_factor": {
+    "type": "string",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "socket": {
+    "type": "string",
+    "scope": "offer",
+    "unit": null,
+    "ops": [
+      "eq",
+      "in"
+    ]
+  },
+  "price_minor": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "minor",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  },
+  "total_price_minor": {
+    "type": "integer",
+    "scope": "offer",
+    "unit": "minor",
+    "ops": [
+      "eq",
+      "in",
+      "gte",
+      "lte",
+      "between"
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "request_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "client_request_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "session_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "revision": 1,
+  "catalog_version": "synthetic-ui",
+  "status": "degraded",
+  "mode": "functional",
+  "interpreted_goal": "Восстановление виртуальных машин",
+  "applied_filters": [],
+  "context_delta": {
+    "added_filter_ids": [],
+    "replaced_filter_ids": [],
+    "removed_filter_ids": [],
+    "resolved_reference": null,
+    "topic_changed": true
+  },
+  "items": [],
+  "components": [],
+  "expert_assumptions": [],
+  "primary_outcome": "undetermined",
+  "counts": {
+    "primary_full": 0,
+    "primary_partial": 0,
+    "related": 0
+  },
+  "insufficient_relevant_items": true,
+  "search_truncated": false,
+  "catalog_absence_confirmed": false,
+  "warnings": [
+    "Внешняя интерпретация временно недоступна."
+  ],
+  "suggestions": [
+    {
+      "label": "Уточнить платформу",
+      "action": "query",
+      "query": "для платформы виртуализации",
+      "filter_id": null
+    }
+  ],
+  "clarification_question": "На какой платформе работают виртуальные машины?",
+  "trace_url": "/api/v1/trace/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "usage": {
+    "llm_attempts": 1,
+    "cache_hits": 0,
+    "cost_known": "0",
+    "currency": "USD",
+    "cost_complete": false,
+    "latency_ms": 17
+  },
+  "provenance": {
+    "catalog_data": "synthetic_fixture",
+    "profile_mock": false,
+    "business_signals_mock": false,
+    "replay": false
+  }
+}

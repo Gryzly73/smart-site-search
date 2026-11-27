@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "request_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "client_request_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "session_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "revision": 1,
+  "catalog_version": "synthetic-ui",
+  "status": "needs_clarification",
+  "mode": "expert",
+  "interpreted_goal": "Восстановление виртуальных машин",
+  "applied_filters": [],
+  "context_delta": {
+    "added_filter_ids": [],
+    "replaced_filter_ids": [],
+    "removed_filter_ids": [],
+    "resolved_reference": null,
+    "topic_changed": true
+  },
+  "items": [
+    {
+      "card_id": "group:demo-2",
+      "name": "Пример хранения копий",
+      "vendor_names": [
+        "Демо-поставщик"
+      ],
+      "kind": "software",
+      "class_id": "software",
+      "group": "primary_partial",
+      "match_level": "partial",
+      "component_ids": [
+        "backup"
+      ],
+      "selected_offer_id": "demo-2",
+      "price": null,
+      "quantity_total": null,
+      "price_label": "Цена по запросу",
+      "available": null,
+      "availability_label": "Наличие не подтверждено",
+      "url": null,
+      "url_kind": "none",
+      "matched_conditions": [],
+      "unmet_conditions": [
+        {
+          "filter_id": "fixture-term",
+          "status": "unknown",
+          "reason_code": "missing_attribute",
+          "actual_values": [],
+          "source_refs": []
+        }
+      ],
+      "reason": "Подходит по назначению.",
+      "caveats": [
+        "Срок лицензии не подтверждён."
+      ],
+      "source_refs": [],
+      "relation_id": null,
+      "compatibility_status": "not_verified",
+      "business_factors_mock": false,
+      "image_url": null
+    },
+    {
+      "card_id": "offer:demo-3",
+      "name": "Пример сетевого хранилища",
+      "vendor_names": [
+        "Демо-поставщик"
+      ],
+      "kind": "hardware",
+      "class_id": "software",
+      "group": "related",
+      "match_level": "full",
+      "component_ids": [],
+      "selected_offer_id": "demo-3",
+      "price": {
+        "amount_minor": 1250000,
+        "currency": "RUB"
+      },
+      "quantity_total": null,
+      "price_label": "12 500 ₽",
+      "available": true,
+      "availability_label": "В наличии по снимку каталога",
+      "url": null,
+      "url_kind": "none",
+      "matched_conditions": [],
+      "unmet_conditions": [],
+      "reason": "Хранение резервных копий",
+      "caveats": [
+        "Совместимость не проверена."
+      ],
+      "source_refs": [],
+      "relation_id": "demo-backup-storage",
+      "compatibility_status": "not_verified",
+      "business_factors_mock": false,
+      "image_url": null
+    }
+  ],
+  "components": [
+    {
+      "component_id": "backup",
+      "status": "partial",
+      "full_card_ids": [],
+      "partial_card_ids": [
+        "group:demo-2"
+      ],
+      "missing_reason": "Не подтверждён срок",
+      "compatibility_status": "not_verified",
+      "compatibility_evidence": []
+    },
+    {
+      "component_id": "virtualization",
+      "status": "missing",
+      "full_card_ids": [],
+      "partial_card_ids": [],
+      "missing_reason": "Уточните гипервизор",
+      "compatibility_status": "not_verified",
+      "compatibility_evidence": []
+    }
+  ],
+  "expert_assumptions": [
+    "Для копий потребуется отдельное хранилище."
+  ],
+  "primary_outcome": "partial",
+  "counts": {
+    "primary_full": 0,
+    "primary_partial": 1,
+    "related": 1
+  },
+  "insufficient_relevant_items": true,
+  "search_truncated": false,
+  "catalog_absence_confirmed": false,
+  "warnings": [
+    "Найдено три обоснованных позиции."
+  ],
+  "suggestions": [
+    {
+      "label": "Уточнить платформу",
+      "action": "query",
+      "query": "для платформы виртуализации",
+      "filter_id": null
+    }
+  ],
+  "clarification_question": "На какой платформе работают виртуальные машины?",
+  "trace_url": "/api/v1/trace/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "usage": {
+    "llm_attempts": 0,
+    "cache_hits": 0,
+    "cost_known": "0",
+    "currency": "USD",
+    "cost_complete": true,
+    "latency_ms": 17
+  },
+  "provenance": {
+    "catalog_data": "synthetic_fixture",
+    "profile_mock": false,
+    "business_signals_mock": false,
+    "replay": false
+  }
+}

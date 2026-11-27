@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "request_id": null,
+  "error": {
+    "code": "revision_conflict",
+    "message": "Поисковый диалог уже обновился.",
+    "retryable": false
+  },
+  "session_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "revision": 2
+}

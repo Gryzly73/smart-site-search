@@ -1,0 +1,94 @@
+[
+  {
+    "relation_id": "server_hardware_server_os",
+    "source": {
+      "type": "role",
+      "id": "server_hardware"
+    },
+    "target": {
+      "type": "role",
+      "id": "server_os"
+    },
+    "relation_type": "complements",
+    "reason": "Серверная операционная система",
+    "propagated_filter_keys": [],
+    "source_refs": [
+      {
+        "source": "reviewed_enrichment",
+        "entity_id": "server_hardware_server_os",
+        "field": "functional_relation",
+        "artifact_version": "1"
+      }
+    ],
+    "version": "1"
+  },
+  {
+    "relation_id": "server_hardware_hypervisor",
+    "source": {
+      "type": "role",
+      "id": "server_hardware"
+    },
+    "target": {
+      "type": "role",
+      "id": "hypervisor"
+    },
+    "relation_type": "complements",
+    "reason": "Виртуализация сервера",
+    "propagated_filter_keys": [],
+    "source_refs": [
+      {
+        "source": "reviewed_enrichment",
+        "entity_id": "server_hardware_hypervisor",
+        "field": "functional_relation",
+        "artifact_version": "1"
+      }
+    ],
+    "version": "1"
+  },
+  {
+    "relation_id": "server_hardware_ups",
+    "source": {
+      "type": "role",
+      "id": "server_hardware"
+    },
+    "target": {
+      "type": "role",
+      "id": "ups"
+    },
+    "relation_type": "complements",
+    "reason": "Резервное питание",
+    "propagated_filter_keys": [],
+    "source_refs": [
+      {
+        "source": "reviewed_enrichment",
+        "entity_id": "server_hardware_ups",
+        "field": "functional_relation",
+        "artifact_version": "1"
+      }
+    ],
+    "version": "1"
+  },
+  {
+    "relation_id": "backup_restore_nas",
+    "source": {
+      "type": "role",
+      "id": "backup_restore"
+    },
+    "target": {
+      "type": "role",
+      "id": "nas"
+    },
+    "relation_type": "complements",
+    "reason": "Хранение резервных копий",
+    "propagated_filter_keys": [],
+    "source_refs": [
+      {
+        "source": "reviewed_enrichment",
+        "entity_id": "backup_restore_nas",
+        "field": "functional_relation",
+        "artifact_version": "1"
+      }
+    ],
+    "version": "1"
+  }
+]

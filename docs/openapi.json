@@ -1,0 +1,1971 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Умный поиск на сайте",
+    "version": "1.0"
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "summary": "Ready",
+        "operationId": "ready_readyz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Readiness"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "post": {
+        "summary": "Search",
+        "operationId": "search_api_v1_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trace/{request_id}": {
+      "get": {
+        "summary": "Trace",
+        "operationId": "trace_api_v1_trace__request_id__get",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventEnvelope"
+                  },
+                  "title": "Response Trace Api V1 Trace  Request Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/events": {
+      "post": {
+        "summary": "Events",
+        "operationId": "events_api_v1_events_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics": {
+      "get": {
+        "summary": "Analytics",
+        "operationId": "analytics_api_v1_analytics_get",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "title": "To"
+            }
+          },
+          {
+            "name": "cohort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "real",
+                "mock",
+                "all"
+              ],
+              "type": "string",
+              "default": "all",
+              "title": "Cohort"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalyticsReport": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "from": {
+            "type": "string",
+            "title": "From"
+          },
+          "to": {
+            "type": "string",
+            "title": "To"
+          },
+          "generated_at": {
+            "type": "string",
+            "title": "Generated At"
+          },
+          "cohorts": {
+            "items": {
+              "$ref": "#/components/schemas/Cohort"
+            },
+            "type": "array",
+            "title": "Cohorts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "generated_at",
+          "cohorts"
+        ],
+        "title": "AnalyticsReport"
+      },
+      "ClientEvent": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Event Id"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "results_impression",
+              "result_click",
+              "feedback",
+              "mock_order"
+            ],
+            "title": "Event Type"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "event_id",
+          "session_id",
+          "request_id",
+          "occurred_at",
+          "event_type",
+          "payload"
+        ],
+        "title": "ClientEvent"
+      },
+      "Cohort": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "real",
+              "mock"
+            ],
+            "title": "Name"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/ReportMetric"
+            },
+            "type": "array",
+            "title": "Metrics"
+          },
+          "demand": {
+            "items": {
+              "$ref": "#/components/schemas/Demand"
+            },
+            "type": "array",
+            "title": "Demand"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/Gap"
+            },
+            "type": "array",
+            "title": "Gaps"
+          },
+          "costs_by_mode": {
+            "items": {
+              "$ref": "#/components/schemas/ModeCost"
+            },
+            "type": "array",
+            "title": "Costs By Mode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "metrics",
+          "demand",
+          "gaps",
+          "costs_by_mode"
+        ],
+        "title": "Cohort"
+      },
+      "ComponentResult": {
+        "properties": {
+          "component_id": {
+            "type": "string",
+            "title": "Component Id"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "rationale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rationale"
+          },
+          "unknowns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unknowns"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "covered",
+              "partial",
+              "missing"
+            ],
+            "title": "Status"
+          },
+          "full_card_ids": {
+            "items": {
+              "type": "string",
+              "pattern": "^(group|offer):.+$"
+            },
+            "type": "array",
+            "title": "Full Card Ids"
+          },
+          "partial_card_ids": {
+            "items": {
+              "type": "string",
+              "pattern": "^(group|offer):.+$"
+            },
+            "type": "array",
+            "title": "Partial Card Ids"
+          },
+          "missing_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Missing Reason"
+          },
+          "compatibility_status": {
+            "type": "string",
+            "enum": [
+              "not_verified",
+              "evidence_available"
+            ],
+            "title": "Compatibility Status"
+          },
+          "compatibility_evidence": {
+            "items": {
+              "$ref": "#/components/schemas/SourceRef"
+            },
+            "type": "array",
+            "title": "Compatibility Evidence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "component_id",
+          "status",
+          "full_card_ids",
+          "partial_card_ids",
+          "compatibility_status",
+          "compatibility_evidence"
+        ],
+        "title": "ComponentResult"
+      },
+      "ConditionCheck": {
+        "properties": {
+          "filter_id": {
+            "type": "string",
+            "title": "Filter Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "match",
+              "mismatch",
+              "unknown"
+            ],
+            "title": "Status"
+          },
+          "reason_code": {
+            "type": "string",
+            "enum": [
+              "value_match",
+              "value_mismatch",
+              "missing_attribute",
+              "conflicting_values",
+              "unknown_price",
+              "unknown_quantity_basis",
+              "unsupported_condition"
+            ],
+            "title": "Reason Code"
+          },
+          "actual_values": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Actual Values"
+          },
+          "source_refs": {
+            "items": {
+              "$ref": "#/components/schemas/SourceRef"
+            },
+            "type": "array",
+            "title": "Source Refs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "filter_id",
+          "status",
+          "reason_code",
+          "actual_values",
+          "source_refs"
+        ],
+        "title": "ConditionCheck"
+      },
+      "ContextDelta": {
+        "properties": {
+          "added_filter_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Added Filter Ids"
+          },
+          "replaced_filter_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Replaced Filter Ids"
+          },
+          "removed_filter_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Removed Filter Ids"
+          },
+          "resolved_reference": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(group|offer):.+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved Reference"
+          },
+          "topic_changed": {
+            "type": "boolean",
+            "title": "Topic Changed",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ContextDelta"
+      },
+      "Counts": {
+        "properties": {
+          "primary_full": {
+            "type": "integer",
+            "title": "Primary Full",
+            "default": 0
+          },
+          "primary_partial": {
+            "type": "integer",
+            "title": "Primary Partial",
+            "default": 0
+          },
+          "related": {
+            "type": "integer",
+            "title": "Related",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Counts"
+      },
+      "Demand": {
+        "properties": {
+          "goal_or_role": {
+            "type": "string",
+            "title": "Goal Or Role"
+          },
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "sessions": {
+            "type": "integer",
+            "title": "Sessions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "goal_or_role",
+          "requests",
+          "sessions"
+        ],
+        "title": "Demand"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "retryable"
+        ],
+        "title": "ErrorDetail"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse"
+      },
+      "EventAccepted": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "accepted": {
+            "type": "boolean",
+            "const": true,
+            "title": "Accepted",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "event_id"
+        ],
+        "title": "EventAccepted"
+      },
+      "EventEnvelope": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "event_type": {
+            "type": "string",
+            "title": "Event Type"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "seq": {
+            "type": "integer",
+            "title": "Seq"
+          },
+          "occurred_at": {
+            "type": "string",
+            "title": "Occurred At"
+          },
+          "received_at": {
+            "type": "string",
+            "title": "Received At"
+          },
+          "catalog_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Version"
+          },
+          "app_version": {
+            "type": "string",
+            "title": "App Version"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/EventProvenance"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "event_id",
+          "event_type",
+          "seq",
+          "occurred_at",
+          "received_at",
+          "app_version",
+          "provenance",
+          "payload"
+        ],
+        "title": "EventEnvelope"
+      },
+      "EventProvenance": {
+        "properties": {
+          "catalog_data": {
+            "type": "string",
+            "enum": [
+              "provided",
+              "synthetic_fixture"
+            ],
+            "title": "Catalog Data"
+          },
+          "profile_mock": {
+            "type": "boolean",
+            "title": "Profile Mock",
+            "default": false
+          },
+          "business_signals_mock": {
+            "type": "boolean",
+            "title": "Business Signals Mock",
+            "default": false
+          },
+          "replay": {
+            "type": "boolean",
+            "title": "Replay",
+            "default": false
+          },
+          "behavior_mock": {
+            "type": "boolean",
+            "title": "Behavior Mock",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "catalog_data"
+        ],
+        "title": "EventProvenance"
+      },
+      "Filter": {
+        "properties": {
+          "filter_id": {
+            "type": "string",
+            "title": "Filter Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "in",
+              "gte",
+              "lte",
+              "between"
+            ],
+            "title": "Op"
+          },
+          "values": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Values"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "strength": {
+            "type": "string",
+            "enum": [
+              "require",
+              "prefer",
+              "exclude"
+            ],
+            "title": "Strength"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "topic",
+              "session",
+              "component"
+            ],
+            "title": "Scope"
+          },
+          "component_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Component Id"
+          },
+          "source_turn_id": {
+            "type": "string",
+            "title": "Source Turn Id"
+          },
+          "source_text": {
+            "type": "string",
+            "title": "Source Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "filter_id",
+          "key",
+          "op",
+          "values",
+          "strength",
+          "scope",
+          "source_turn_id",
+          "source_text"
+        ],
+        "title": "Filter"
+      },
+      "Gap": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "evidence_status": {
+            "type": "string",
+            "title": "Evidence Status"
+          },
+          "recommendation": {
+            "type": "string",
+            "title": "Recommendation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "count",
+          "evidence_status",
+          "recommendation"
+        ],
+        "title": "Gap"
+      },
+      "Health": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "alive",
+            "title": "Status",
+            "default": "alive"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Health"
+      },
+      "Metric": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "numerator": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numerator"
+          },
+          "denominator": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Denominator"
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "measured",
+              "mock",
+              "unavailable",
+              "scenario"
+            ],
+            "title": "Availability"
+          },
+          "definition": {
+            "type": "string",
+            "title": "Definition"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "value",
+          "numerator",
+          "denominator",
+          "availability",
+          "definition",
+          "limitations"
+        ],
+        "title": "Metric"
+      },
+      "ModeCost": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "calls": {
+            "type": "integer",
+            "title": "Calls"
+          },
+          "known_cost": {
+            "type": "string",
+            "title": "Known Cost"
+          },
+          "unknown_calls": {
+            "type": "integer",
+            "title": "Unknown Calls"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mode",
+          "requests",
+          "calls",
+          "known_cost",
+          "unknown_calls",
+          "currency"
+        ],
+        "title": "ModeCost"
+      },
+      "Money": {
+        "properties": {
+          "amount_minor": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Amount Minor"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "amount_minor",
+          "currency"
+        ],
+        "title": "Money"
+      },
+      "Provenance": {
+        "properties": {
+          "catalog_data": {
+            "type": "string",
+            "enum": [
+              "provided",
+              "synthetic_fixture"
+            ],
+            "title": "Catalog Data"
+          },
+          "profile_mock": {
+            "type": "boolean",
+            "title": "Profile Mock",
+            "default": false
+          },
+          "business_signals_mock": {
+            "type": "boolean",
+            "title": "Business Signals Mock",
+            "default": false
+          },
+          "replay": {
+            "type": "boolean",
+            "title": "Replay",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "catalog_data"
+        ],
+        "title": "Provenance"
+      },
+      "Readiness": {
+        "properties": {
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "catalog_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Version"
+          },
+          "storage_ok": {
+            "type": "boolean",
+            "title": "Storage Ok"
+          },
+          "llm_state": {
+            "type": "string",
+            "title": "Llm State"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ready",
+          "catalog_version",
+          "storage_ok",
+          "llm_state"
+        ],
+        "title": "Readiness"
+      },
+      "ReportMetric": {
+        "properties": {
+          "metric_id": {
+            "type": "string",
+            "title": "Metric Id"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/Metric"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "metric_id",
+          "metric"
+        ],
+        "title": "ReportMetric"
+      },
+      "ResultItem": {
+        "properties": {
+          "card_id": {
+            "type": "string",
+            "pattern": "^(group|offer):.+$",
+            "title": "Card Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "vendor_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Vendor Names"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "software",
+              "hardware"
+            ],
+            "title": "Kind"
+          },
+          "class_id": {
+            "type": "string",
+            "title": "Class Id"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "group": {
+            "type": "string",
+            "enum": [
+              "primary_full",
+              "primary_partial",
+              "related"
+            ],
+            "title": "Group"
+          },
+          "match_level": {
+            "type": "string",
+            "enum": [
+              "full",
+              "partial"
+            ],
+            "title": "Match Level"
+          },
+          "component_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Component Ids"
+          },
+          "selected_offer_id": {
+            "type": "string",
+            "title": "Selected Offer Id"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quantity_total": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "price_label": {
+            "type": "string",
+            "title": "Price Label"
+          },
+          "available": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available"
+          },
+          "availability_label": {
+            "type": "string",
+            "title": "Availability Label"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "url_kind": {
+            "type": "string",
+            "enum": [
+              "card",
+              "offer",
+              "none"
+            ],
+            "title": "Url Kind"
+          },
+          "matched_conditions": {
+            "items": {
+              "$ref": "#/components/schemas/ConditionCheck"
+            },
+            "type": "array",
+            "title": "Matched Conditions"
+          },
+          "unmet_conditions": {
+            "items": {
+              "$ref": "#/components/schemas/ConditionCheck"
+            },
+            "type": "array",
+            "title": "Unmet Conditions"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Caveats"
+          },
+          "source_refs": {
+            "items": {
+              "$ref": "#/components/schemas/SourceRef"
+            },
+            "type": "array",
+            "title": "Source Refs"
+          },
+          "relation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relation Id"
+          },
+          "compatibility_status": {
+            "type": "string",
+            "enum": [
+              "not_verified",
+              "evidence_available"
+            ],
+            "title": "Compatibility Status"
+          },
+          "business_factors_mock": {
+            "type": "boolean",
+            "title": "Business Factors Mock",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "card_id",
+          "name",
+          "vendor_names",
+          "kind",
+          "class_id",
+          "group",
+          "match_level",
+          "component_ids",
+          "selected_offer_id",
+          "price_label",
+          "availability_label",
+          "url_kind",
+          "matched_conditions",
+          "unmet_conditions",
+          "reason",
+          "caveats",
+          "source_refs",
+          "compatibility_status"
+        ],
+        "title": "ResultItem"
+      },
+      "SearchRequest": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version"
+          },
+          "client_request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Request Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Query"
+          },
+          "reference_request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Request Id"
+          },
+          "selected_card_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(group|offer):.+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Card Id"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 12.0,
+            "minimum": 4.0,
+            "title": "Limit",
+            "default": 8
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema_version",
+          "client_request_id",
+          "expected_revision",
+          "query"
+        ],
+        "title": "SearchRequest"
+      },
+      "SearchResponse": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "client_request_id": {
+            "type": "string",
+            "title": "Client Request Id"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "catalog_version": {
+            "type": "string",
+            "title": "Catalog Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded",
+              "needs_clarification"
+            ],
+            "title": "Status"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "functional",
+              "expert"
+            ],
+            "title": "Mode"
+          },
+          "interpreted_goal": {
+            "type": "string",
+            "title": "Interpreted Goal"
+          },
+          "applied_filters": {
+            "items": {
+              "$ref": "#/components/schemas/Filter"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Applied Filters"
+          },
+          "context_delta": {
+            "$ref": "#/components/schemas/ContextDelta"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ResultItem"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "title": "Items"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentResult"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "title": "Components"
+          },
+          "expert_assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Expert Assumptions"
+          },
+          "primary_outcome": {
+            "type": "string",
+            "enum": [
+              "full",
+              "partial",
+              "none",
+              "undetermined"
+            ],
+            "title": "Primary Outcome"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/Counts"
+          },
+          "insufficient_relevant_items": {
+            "type": "boolean",
+            "title": "Insufficient Relevant Items"
+          },
+          "search_truncated": {
+            "type": "boolean",
+            "title": "Search Truncated"
+          },
+          "catalog_absence_confirmed": {
+            "type": "boolean",
+            "title": "Catalog Absence Confirmed",
+            "default": false
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/Suggestion"
+            },
+            "type": "array",
+            "title": "Suggestions"
+          },
+          "clarification_question": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clarification Question"
+          },
+          "trace_url": {
+            "type": "string",
+            "title": "Trace Url"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/UsageSummary"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "client_request_id",
+          "session_id",
+          "revision",
+          "catalog_version",
+          "status",
+          "mode",
+          "interpreted_goal",
+          "applied_filters",
+          "context_delta",
+          "items",
+          "components",
+          "expert_assumptions",
+          "primary_outcome",
+          "counts",
+          "insufficient_relevant_items",
+          "search_truncated",
+          "warnings",
+          "suggestions",
+          "trace_url",
+          "usage",
+          "provenance"
+        ],
+        "title": "SearchResponse"
+      },
+      "SourceRef": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "feed",
+              "category",
+              "taxonomy_rule",
+              "reviewed_enrichment",
+              "external_doc",
+              "llm_hypothesis",
+              "mock"
+            ],
+            "title": "Source"
+          },
+          "catalog_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Version"
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id"
+          },
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "raw_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Index"
+          },
+          "artifact_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Version"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "document_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Url"
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "source",
+          "entity_id",
+          "field"
+        ],
+        "title": "SourceRef"
+      },
+      "Suggestion": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "query",
+              "remove_filter",
+              "new_topic"
+            ],
+            "title": "Action"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query"
+          },
+          "filter_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filter Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "label",
+          "action"
+        ],
+        "title": "Suggestion"
+      },
+      "UsageSummary": {
+        "properties": {
+          "llm_attempts": {
+            "type": "integer",
+            "title": "Llm Attempts",
+            "default": 0
+          },
+          "cache_hits": {
+            "type": "integer",
+            "title": "Cache Hits",
+            "default": 0
+          },
+          "cost_known": {
+            "type": "string",
+            "title": "Cost Known",
+            "default": "0"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "USD"
+          },
+          "cost_complete": {
+            "type": "boolean",
+            "title": "Cost Complete",
+            "default": true
+          },
+          "latency_ms": {
+            "type": "integer",
+            "title": "Latency Ms",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "UsageSummary"
+      }
+    }
+  }
+}

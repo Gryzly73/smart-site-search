@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "client_request_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "session_id": null,
+  "expected_revision": 0,
+  "query": "Мне нужен архив для восстановления виртуальных машин",
+  "reference_request_id": null,
+  "selected_card_id": null,
+  "limit": 8
+}

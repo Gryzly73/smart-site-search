@@ -1,0 +1,253 @@
+:root {
+  color-scheme: light;
+  --paper: #f3efe6;
+  --sheet: #fffdf8;
+  --ink: #1d1a16;
+  --muted: #5c564c;
+  --line: #d9d0c3;
+  --teal: #0d5c5c;
+  --teal-ink: #083f3f;
+  --full: #e5f2ea;
+  --partial: #f8efd8;
+  --related: #e7eef3;
+  --danger: #8c2f2f;
+  --danger-bg: #f8e8e4;
+  --focus: #0b6b4f;
+  --shadow: 0 1px 0 rgba(29, 26, 22, 0.04);
+  font-family: "Segoe UI", "PT Sans", sans-serif;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(180deg, rgba(13, 92, 92, 0.08), transparent 220px),
+    var(--paper);
+  color: var(--ink);
+}
+
+.skip {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  background: var(--ink);
+  color: white;
+  padding: 0.4rem 0.7rem;
+}
+
+.skip:focus { top: 0.5rem; z-index: 2; }
+
+.frame {
+  width: min(920px, calc(100% - 1.5rem));
+  margin: 0 auto;
+  padding: 1.25rem 0 6rem;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+h1, h2, h3 {
+  font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0;
+}
+
+h1 { font-size: 2rem; }
+
+.eyebrow {
+  margin: 0 0 0.2rem;
+  color: var(--teal-ink);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+nav { display: flex; gap: 0.5rem; align-items: center; }
+
+a { color: var(--teal-ink); }
+
+button, .button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button, .button {
+  border: 1px solid var(--teal);
+  background: var(--teal);
+  color: white;
+  border-radius: 999px;
+  padding: 0.55rem 0.95rem;
+  cursor: pointer;
+}
+
+button.secondary, a.button.secondary {
+  background: transparent;
+  color: var(--teal-ink);
+}
+
+button:disabled { opacity: 0.55; cursor: wait; }
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+#status {
+  min-height: 1.4em;
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+}
+
+.composer, .panel, .turn, .card, .notice {
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.composer {
+  position: sticky;
+  bottom: 0.75rem;
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.composer label { font-weight: 650; }
+
+textarea, input[type="date"], select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  padding: 0.65rem 0.75rem;
+}
+
+textarea { resize: vertical; min-height: 3.2rem; }
+
+.composer-row, .filters, .card-actions, .choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.selection {
+  margin: 0;
+  color: var(--teal-ink);
+}
+
+.thread { display: grid; gap: 0.9rem; margin-bottom: 1rem; }
+
+.turn { padding: 0.9rem 1rem; }
+
+.turn.user { background: #e7f3f3; }
+
+.turn header, .card header { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; align-items: baseline; justify-content: space-between; }
+
+.meta, .fine { color: var(--muted); font-size: 0.92rem; }
+
+.groups { display: grid; gap: 0.8rem; margin-top: 0.8rem; }
+
+.group h3 { font-size: 1.15rem; margin-bottom: 0.45rem; }
+
+.card {
+  padding: 0.85rem 0.95rem;
+  margin-bottom: 0.6rem;
+}
+
+.card.primary_full { background: var(--full); }
+.card.primary_partial { background: var(--partial); }
+.card.related, .card.companion { background: var(--related); }
+
+.companions {
+  margin: 0.2rem 0 0.8rem 1.2rem;
+  padding-left: 0.8rem;
+  border-left: 3px solid var(--teal);
+}
+
+.companions h3 { font-size: 1.05rem; margin-bottom: 0.45rem; }
+
+.card h4 { margin: 0.15rem 0; font-size: 1.2rem; }
+
+.budget-alternative { border-top: 1px solid var(--line); margin-top: 0.8rem; padding-top: 0.7rem; }
+.budget-alternative h5 { font-size: 1rem; margin: 0; }
+
+.facts { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0.2rem 0.6rem; margin: 0.55rem 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.4rem 0; }
+.chip {
+  border-radius: 999px;
+  padding: 0.12rem 0.55rem;
+  background: rgba(29, 26, 22, 0.06);
+  font-size: 0.88rem;
+}
+.chip.warn { background: #f3d7a1; }
+.chip.bad { background: #f0cfcb; }
+
+.notice {
+  padding: 0.75rem 0.9rem;
+  margin: 0.5rem 0;
+}
+.notice.danger { background: var(--danger-bg); color: var(--danger); border-color: #e3c2bc; }
+.notice.warn { background: #fff6e4; }
+
+.components, .assumptions { margin-top: 0.8rem; }
+.component { padding: 0.55rem 0; border-top: 1px solid var(--line); }
+.component a, .component button.linkish {
+  background: none;
+  border: 0;
+  color: var(--teal-ink);
+  padding: 0;
+  border-radius: 0;
+  text-decoration: underline;
+}
+
+details { margin-top: 0.7rem; }
+summary { cursor: pointer; font-weight: 650; }
+ol.stages { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+
+.analytics-form { display: grid; gap: 0.7rem; padding: 0.9rem; }
+.dates { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+
+.cohort { margin-top: 1rem; }
+table { width: 100%; border-collapse: collapse; background: var(--sheet); }
+th, td { text-align: left; vertical-align: top; padding: 0.45rem 0.5rem; border-bottom: 1px solid var(--line); }
+th { font-size: 0.85rem; color: var(--muted); font-weight: 650; }
+
+.tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  background: #efe7da;
+  font-size: 0.82rem;
+}
+.tag.mock { background: #f3d7a1; }
+.tag.unavailable { background: #eadfdf; }
+.tag.measured { background: #d7eadf; }
+
+img.preview { max-width: 120px; max-height: 80px; object-fit: contain; border-radius: 8px; }
+
+@media (max-width: 640px) {
+  .frame { width: min(100% - 1rem, 920px); padding-top: 0.8rem; }
+  h1 { font-size: 1.55rem; }
+  .facts { grid-template-columns: 1fr; }
+  .dates { grid-template-columns: 1fr; }
+  .composer { bottom: 0; border-radius: 16px 16px 0 0; }
+}
+
+@media (min-width: 960px) {
+  .frame { width: min(980px, calc(100% - 3rem)); }
+}

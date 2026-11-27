@@ -1,0 +1,244 @@
+{
+  "rules": {
+    "hardware": [
+      [
+        "ups",
+        "^(?:ибп\\b|источник(?:и)? бесперебойного питания\\b|ups\\b)|\\bsmart-ups\\b",
+        []
+      ],
+      [
+        "gpu",
+        "^(?:видеокарта|графический ускоритель)(?:\\s|$)",
+        []
+      ],
+      [
+        "laptop",
+        "^(?:ноутбук|мобильная рабочая станция|laptop)(?:\\s|$)",
+        []
+      ],
+      [
+        "nas",
+        "^(?:сетево(?:й накопитель|е хранилище)|nas)(?:\\s|$)|\\b(?:synology diskstation|qnap turbo nas)\\b",
+        []
+      ],
+      [
+        "storage",
+        "^(?:система хранения|схд|жесткий диск|твердотельный накопитель|накопитель ssd|ssd|hdd)(?:\\s|$)",
+        []
+      ],
+      [
+        "server_hardware",
+        "^(?:(?:стоечный|стойковый|блейд)\\s+)?(?:сервер|rack server)(?:\\s|$)",
+        [
+          "compute"
+        ]
+      ],
+      [
+        "workstation",
+        "^(?:рабочая станция|персональный компьютер|компьютер|моноблок)(?:\\s|$)",
+        [
+          "compute"
+        ]
+      ],
+      [
+        "network_hardware",
+        "^(?:коммутатор|маршрутизатор|точка доступа)(?:\\s|$)",
+        []
+      ],
+      [
+        "unclassified",
+        "^процессор\\b",
+        [
+          "cpu"
+        ]
+      ],
+      [
+        "unclassified",
+        "^(?:оперативная память|модуль памяти)\\b",
+        [
+          "ram"
+        ]
+      ]
+    ],
+    "software": [
+      [
+        "directory_service",
+        "\\b(?:dynamic directory|rosa (?:identity|directory)|active directory)\\b",
+        []
+      ],
+      [
+        "backup",
+        "\\b(?:кибер\\s*б[эе]кап|резервн\\w* копирован\\w*|veeam backup|acronis (?:cyber backup|backup|true image)|bacula|altaro vm backup|veritas backup|r-?drive image)\\b",
+        []
+      ],
+      [
+        "virtualization",
+        "\\b(?:альт виртуализация|vmware (?:vsphere|esxi|workstation|fusion)|hyper-v|proxmox (?:virtual environment|ve)|virtualbox|скала-р виртуализация|базис\\.виртуализация|ovirt)(?:\\b|$)",
+        [
+          "hypervisor",
+          "virtualization_platform"
+        ]
+      ],
+      [
+        "operating_system",
+        "\\b(?:альт сервер|windows server|red hat enterprise linux server|rosa (?:enterprise linux|server)|suse linux enterprise server|ubuntu server|oracle linux|redos server)\\b",
+        [
+          "server_os"
+        ]
+      ],
+      [
+        "operating_system",
+        "\\b(?:astra linux|астра линукс|альт (?:рабочая станция|линукс|образование|сп)|windows (?:7|8|10|11|professional)|ред ос|redos|rosa linux|ubuntu|debian|linux mint|система астра)\\b",
+        []
+      ],
+      [
+        "endpoint_protection",
+        "\\b(?:антивирус\\w*|endpoint (?:security|protection)|kaspersky (?:small office security|security cloud|standard|plus|premium|internet security|total security)|dr\\.?web (?:security space|desktop security suite)|eset (?:nod32|endpoint))\\b",
+        []
+      ],
+      [
+        "office_software",
+        "\\b(?:microsoft (?:365|office)|office 365|мойофис|р7-офис|p7-офис|onlyoffice|libreoffice|офисн\\w* пакет)\\b",
+        []
+      ],
+      [
+        "remote_access",
+        "\\b(?:anydesk|teamviewer|remote desktop|radmin|ассистент|удаленн\\w* доступ)\\b",
+        []
+      ],
+      [
+        "security_software",
+        "\\b(?:крипто\\s*про|cryptopro|maxpatrol|сканер-вс)\\b",
+        []
+      ],
+      [
+        "llm_software",
+        "^(?:ollama|vllm|llama\\.cpp|lm studio)\\b",
+        [
+          "llm_runtime"
+        ]
+      ]
+    ],
+    "shelves": {
+      "hardware": [
+        [
+          "gpu",
+          "^видеокарты$"
+        ],
+        [
+          "ups",
+          "^(?:источники бесперебойного питания|ибп)$"
+        ],
+        [
+          "nas",
+          "^(?:сетевые накопители|сетевые хранилища|nas)$"
+        ],
+        [
+          "laptop",
+          "^ноутбуки$"
+        ],
+        [
+          "server_hardware",
+          "^(?:серверы|стоечные серверы|серверное оборудование)$"
+        ],
+        [
+          "workstation",
+          "^(?:рабочие станции|настольные компьютеры)$"
+        ],
+        [
+          "storage",
+          "^(?:жесткие диски|твердотельные накопители|системы хранения данных)$"
+        ]
+      ],
+      "software": [
+        [
+          "operating_system",
+          "^(?:российские операционные системы|операционные системы)$"
+        ]
+      ]
+    }
+  },
+  "shelf_classes": {
+    "hardware": [
+      [
+        "gpu",
+        "^видеокарты$"
+      ],
+      [
+        "ups",
+        "^(?:источники бесперебойного питания|ибп)$"
+      ],
+      [
+        "nas",
+        "^(?:сетевые накопители|сетевые хранилища|nas)$"
+      ],
+      [
+        "laptop",
+        "^ноутбуки$"
+      ],
+      [
+        "server_hardware",
+        "^(?:серверы|стоечные серверы|серверное оборудование)$"
+      ],
+      [
+        "workstation",
+        "^(?:рабочие станции|настольные компьютеры)$"
+      ],
+      [
+        "storage",
+        "^(?:жесткие диски|твердотельные накопители|системы хранения данных)$"
+      ]
+    ],
+    "software": [
+      [
+        "operating_system",
+        "^(?:российские операционные системы|операционные системы)$"
+      ]
+    ]
+  },
+  "class_roles": {
+    "server_hardware": [
+      "server_hardware"
+    ],
+    "operating_system": [
+      "operating_system"
+    ],
+    "backup": [
+      "backup_restore"
+    ],
+    "endpoint_protection": [
+      "endpoint_security"
+    ],
+    "office_software": [
+      "office_software"
+    ],
+    "gpu": [
+      "gpu"
+    ],
+    "ups": [
+      "ups"
+    ],
+    "laptop": [
+      "laptop"
+    ],
+    "storage": [
+      "storage"
+    ],
+    "nas": [
+      "nas",
+      "storage"
+    ],
+    "workstation": [
+      "workstation"
+    ],
+    "network_hardware": [
+      "network_hardware"
+    ],
+    "remote_access": [
+      "remote_access"
+    ],
+    "directory_service": [
+      "directory_service"
+    ]
+  }
+}
