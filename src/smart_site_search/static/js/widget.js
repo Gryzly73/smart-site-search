@@ -25,6 +25,7 @@ const form = document.querySelector("#composer");
 const query = document.querySelector("#query");
 const send = document.querySelector("#send");
 const boards = new WeakMap();
+const welcome = log.querySelector(".welcome");
 let controller = null;
 
 launcher.addEventListener("click", () => setOpen(true));
@@ -80,7 +81,7 @@ function resetDialog() {
   state.selection = null;
   state.pendingBody = null;
   state.impressed = new Set();
-  log.replaceChildren();
+  log.replaceChildren(welcome);
   operator.disabled = false;
   operator.parentElement?.querySelector(".operator-note")?.remove();
   syncClear();
@@ -89,8 +90,10 @@ function resetDialog() {
 }
 
 function syncClear() {
-  clear.hidden = log.childElementCount === 0;
+  clear.hidden = ![...log.children].some((node) => node !== welcome);
 }
+
+setOpen(true);
 
 function postSearch(body) {
   controller?.abort();
