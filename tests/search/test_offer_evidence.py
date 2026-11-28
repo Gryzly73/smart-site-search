@@ -45,10 +45,8 @@ def test_budget_comparison_keeps_verified_alternatives_on_the_same_card():
         _number("vram", "vram_gb", "gte", 24, "от 24 ГБ"), maximum,
     ])
     checked = verify_card(candidate, card, [under, *others_under, over, unknown], state, monotonic() + 2)
-    assert checked.selected_offer.offer_id == "12gb"
-    assert budget_fit(state.filters, checked.selected_offer) == ("within", None)
-    assert checked.alternate_offers[0].offer_id == "24gb"
-    assert budget_fit(state.filters, checked.alternate_offers[0]) == (
+    assert checked.selected_offer.offer_id == "24gb"
+    assert budget_fit(state.filters, checked.selected_offer) == (
         "over", Money(amount_minor=300, currency="RUB"),
     )
 

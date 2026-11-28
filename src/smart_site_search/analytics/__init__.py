@@ -12,6 +12,8 @@ from .dialogues import build_dialogue_report, is_mock, read_dialogue_rows
 RECOMMENDATIONS = {
     "missing_attributes": "Проверить данные по запрошенным характеристикам.",
     "no_matching_offer": "Проверить сочетания условий и ассортимент офферов.",
+    "explicit_budget_unmet": "Явный ценовой лимит не выполнен: проверить пустую выдачу или запасной диапазон до 40%.",
+    "explicit_constraint_unmet": "Явное условие не выполнено: проверить пустую выдачу или ближайшие варианты.",
     "no_candidates": "Проверить словарь ролей и покрытие каталога.",
     "candidate_limit": "Проверить полноту retrieval и доступный бюджет поиска.",
     "need_unmapped": "Уточнить роли и альтернативные формулировки потребности.",

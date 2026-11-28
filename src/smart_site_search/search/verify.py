@@ -146,6 +146,15 @@ def numeric_distance(filters, checks) -> int:
     return total
 
 
+def misses_stated_requirement(filters, conditions) -> bool:
+    by_id = {check.filter_id: check for check in conditions}
+    return any(
+        filter_.strength == "require" and not is_budget_ceiling(filter_) and filter_.key != "total_price_minor"
+        and (check := by_id.get(filter_.filter_id)) is not None and check.status == "mismatch"
+        for filter_ in filters
+    )
+
+
 def _offer_check(candidate, card, offer, query, filters):
     checks = [_check(filter_, card, offer) for filter_ in filters]
     rejected = any(filter_.strength == "exclude" and check.status == "match"
@@ -183,8 +192,11 @@ def _offer_check(candidate, card, offer, query, filters):
     ):
         add_on = True
     budget_status, _ = budget_fit(filters, checked)
-    key = ({"full": 0, "partial": 1, "rejected": 2}[level], BUDGET_PRIORITY[budget_status], mismatches, unknown,
-           -prefers, available, add_on, numeric_distance(filters, checks), price, offer.offer_id)
+    non_price_mismatches = sum(filter_.strength == "require" and not is_budget_ceiling(filter_)
+                               and check.status == "mismatch" for filter_, check in zip(filters, checks))
+    key = ({"full": 0, "partial": 1, "rejected": 2}[level], non_price_mismatches,
+           BUDGET_PRIORITY[budget_status], mismatches, unknown, -prefers, available, add_on,
+           numeric_distance(filters, checks), price, offer.offer_id)
     return key, checked
 
 
@@ -215,7 +227,8 @@ def verify_card(candidate: Candidate, card: Card, offers: Iterable[Offer], query
         selected_status, _ = budget_fit(filters, selected)
         if selected_status in {"within", "over"}:
             opposite = "over" if selected_status == "within" else "within"
-            extra = next((offer for _, offer in checked[1:] if budget_fit(filters, offer)[0] == opposite), None)
+            extra = next((offer for _, offer in checked[1:] if budget_fit(filters, offer)[0] == opposite
+                          and not misses_stated_requirement(filters, offer.conditions)), None)
             if extra is not None:
                 alternatives = [extra, *(offer for offer in alternatives if offer.offer_id != extra.offer_id)][:2]
     identity_rank = min(
@@ -231,8 +244,8 @@ def verify_card(candidate: Candidate, card: Card, offers: Iterable[Offer], query
         reason_codes=[] if selected else ["excluded" if excluded else "no_matching_offer"],
         rank_factors=RankFactors(
             relevance_tier={"confirmed": 0, "hypothesis": 1, "insufficient": 2}[candidate.relevance],
-            identity_rank=identity_rank, preference_matches=-key[4] if key else 0,
-            availability_rank=key[5] if key else 2,
+            identity_rank=identity_rank, preference_matches=-key[5] if key else 0,
+            availability_rank=key[6] if key else 2,
             price_minor=selected.price.amount_minor if selected and selected.price else None,
         ),
     )

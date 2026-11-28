@@ -115,27 +115,7 @@ h1 { font-size: 2rem; margin: 0.2rem 0 0.8rem; }
 
 .icon:hover { background: rgba(255, 255, 255, 0.32); }
 
-.operator-bar {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-  padding: 0.55rem 0.8rem 0.15rem;
-  background: white;
-}
-
-.operator {
-  background: #e8d6c2;
-  color: #91694a;
-  border: 1px solid #91694a;
-  border-radius: 0.35rem;
-  padding: 0.28rem 0.7rem;
-  font: inherit;
-  font-size: 0.88rem;
-  cursor: pointer;
-}
-
-.operator:disabled { opacity: 0.55; cursor: default; }
+#operator:disabled { opacity: 0.55; cursor: default; }
 
 .text {
   background: transparent;
@@ -175,7 +155,24 @@ h1 { font-size: 2rem; margin: 0.2rem 0 0.8rem; }
 
 .bubble p { margin: 0.25rem 0; }
 
+.welcome-hello {
+  margin: 0 0 0.35rem;
+  font-size: 1.2rem;
+  font-weight: 650;
+}
+
 .fine { color: var(--slate); font-size: 0.88rem; }
+
+.extra-heading {
+  margin: 0.95rem 0 0.15rem;
+  font-size: 1.05rem;
+}
+
+.budget-note {
+  margin: 0.35rem 0 0.55rem;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
 
 .row {
   display: flex;

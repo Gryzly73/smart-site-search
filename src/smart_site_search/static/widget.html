@@ -24,6 +24,11 @@
     <header class="panel-head">
       <h2>Умный поиск</h2>
       <div class="head-actions">
+        <button type="button" id="operator" class="icon" aria-label="Переключить на оператора" title="Переключить на оператора">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 12a8 8 0 0 1 16 0M4 12v5h3v-5M20 12v5h-3v-5M20 16.5A3.5 3.5 0 0 1 16.5 20H13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
         <button type="button" id="clear" class="icon" hidden aria-label="Очистить историю" title="Очистить историю">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 7.5h14L18 21H6L5 7.5zM15.5 9.5 15 19M12 9.5V19M8.5 9.5 9 19M16 5h3a2 2 0 0 1 2 2v.5H3V7a2 2 0 0 1 2-2h3m8 0-1-2H9L8 5m8 0H8" fill="none" stroke="currentColor" stroke-linejoin="round"/>
@@ -32,12 +37,10 @@
         <button type="button" id="close" class="text">Закрыть</button>
       </div>
     </header>
-    <div class="operator-bar">
-      <button type="button" id="operator" class="operator">Переключить на оператора</button>
-    </div>
     <div id="log" class="log" role="log" aria-live="polite">
       <article class="bubble assistant welcome">
-        <p>Здравствуйте! Я - ИИ помощник магазина Софт Лайн. Чем могу Вам помочь в поиске товара ?</p>
+        <p class="welcome-hello">Здравствуйте!</p>
+        <p>Я - ИИ помощник магазина Софт Лайн. Чем могу Вам помочь в поиске товара ?</p>
       </article>
     </div>
     <form id="composer" class="composer">

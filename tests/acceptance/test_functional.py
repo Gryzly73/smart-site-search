@@ -52,25 +52,20 @@ def test_budget_comparison_uses_two_real_offers_on_one_card(client):
     assert code == 200
     position, item = next((n, item) for n, item in enumerate(result["items"], 1)
                           if item["card_id"] == "group:173614")
-    assert item["budget_status"] == "within"
-    assert item["selected_offer_id"] == "530597"
-    assert item["price"]["amount_minor"] == 8_775_700
+    assert item["budget_status"] == "over"
+    assert item["selected_offer_id"] == "421468"
+    assert item["price"]["amount_minor"] == 10_323_600
+    assert item["budget_alternative"] is None
     filters = {f["filter_id"]: f["key"] for f in result["applied_filters"]}
     assert [(filters[c["filter_id"]], c["status"]) for c in item["unmet_conditions"]] == [
-        ("organization_type", "mismatch"),
-    ]
-    alternative = item["budget_alternative"]
-    assert alternative["offer_id"] == "421468" and alternative["budget_status"] == "over"
-    assert alternative["price"]["amount_minor"] == 10_323_600
-    assert alternative["budget_difference"] == {"amount_minor": 1_323_600, "currency": "RUB"}
-    assert [(filters[c["filter_id"]], c["status"]) for c in alternative["unmet_conditions"]] == [
         ("price_minor", "mismatch"),
     ]
+    assert any("до 40%" in warning for warning in result["warnings"])
     click = client.post("/api/v1/events", json={
         "event_id": str(uuid4()), "event_type": "result_click",
         "session_id": result["session_id"], "request_id": result["request_id"],
         "occurred_at": datetime.now(UTC).isoformat(),
-        "payload": {"card_id": item["card_id"], "offer_id": alternative["offer_id"],
+        "payload": {"card_id": item["card_id"], "offer_id": item["selected_offer_id"],
                     "group": item["group"], "position": position},
     })
     assert click.status_code == 202, click.text
@@ -120,8 +115,10 @@ def test_expert_fallback_verifies_requested_gpu_even_without_a_model(client):
             available_memory.append(memory)
         if check["status"] == "match" and item["available"] is False and memory >= 48:
             unavailable_memory.append(memory)
+    assert available_memory
     assert max(available_memory) == 24
-    assert 48 in unavailable_memory
+    assert not unavailable_memory
+    assert any("ближайшие варианты" in warning for warning in response["warnings"])
 
 
 def test_server_software_disambiguation_keeps_hardware_out_of_primary(client):
@@ -313,6 +310,27 @@ def paged_search(*, size=25, first_match=25, deadline_offset=5):
         "partial_count": sum(item.match_level == "partial" for item in match.primary),
         "truncated": match.truncated,
     }
+
+
+def test_unconfirmed_text_hits_stay_out_of_a_role_result():
+    class Catalog(PagedOffers):
+        def retrieve(self, query, cursor, limit):
+            return CandidateBatch(
+                candidates=[
+                    Candidate(card_id="offer:30", channels=["role"], channel_ranks=[],
+                              matched_role_ids=["server_hardware"], evidence=[], relevance="confirmed"),
+                    Candidate(card_id="offer:1", channels=["fts"], channel_ranks=[],
+                              matched_role_ids=[], evidence=[], relevance="hypothesis"),
+                ],
+                next_cursor=None, examined_card_count=2, exhausted=True, truncated=False,
+            )
+
+    query = QueryState(goal="серверы", mode="functional", role_ids=["server_hardware"], filters=[
+        Filter(filter_id="price", key="price_minor", op="lte", values=[100], strength="require",
+               scope="topic", currency="RUB", source_turn_id="1", source_text="до одного рубля"),
+    ])
+    match = collect_matches(Catalog(first_match=1), query, None, monotonic() + 5, lambda *_: None)
+    assert [item.candidate.card_id for item in match.primary] == ["offer:30"]
 
 
 def test_retrieval_expands_past_confirmed_partial_candidates():

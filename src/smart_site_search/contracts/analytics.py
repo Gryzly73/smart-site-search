@@ -75,6 +75,10 @@ class DialogueTurn(Contract):
     started_at: str
     mode: DialogueMode
     outcome: DialogueOutcome
+    result_kind: Literal["exact", "price_near", "characteristic_near", "unavailable",
+                         "clarification", "partial", "other"] = "other"
+    request_text: str = ""
+    answer_text: str = ""
     clarification: bool
     filter_keys: list[str]
     filter_changes: DialogueFilterChanges
@@ -85,10 +89,28 @@ class DialogueTurn(Contract):
     issues: list[str]
 
 
+class DialogueExample(Contract):
+    topic_id: str
+    started_at: str
+    result_kind: Literal["exact", "price_near", "characteristic_near", "unavailable",
+                         "clarification", "partial", "other"]
+    request_text: str = ""
+    answer_text: str = ""
+    product_name: str | None = None
+
+
+class DialogueSummary(Contract):
+    kind: Literal["exact", "price_near", "characteristic_near", "unavailable",
+                  "clarification", "partial", "other"]
+    count: int
+
+
 class DialogueTopic(Contract):
     topic_id: str
     started_at: str
     mode: DialogueMode
+    result_kind: Literal["exact", "price_near", "characteristic_near", "unavailable",
+                         "clarification", "partial", "other"] = "other"
     role_ids: list[str]
     class_ids: list[str]
     first_outcome: DialogueOutcome
@@ -122,6 +144,8 @@ class DialogueReport(Contract):
     metrics: list[ReportMetric]
     trend: list[DialogueTrend]
     problems: list[DialogueProblem]
+    summary: list[DialogueSummary] = Field(default_factory=list)
+    examples: list[DialogueExample] = Field(default_factory=list)
     topics: list[DialogueTopic]
 
 

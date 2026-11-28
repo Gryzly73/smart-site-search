@@ -312,7 +312,7 @@ test("страницы содержат поле запроса, диалог и
   const widgetCss = readFileSync(join(root, "css", "widget.css"), "utf8");
   assert.match(widgetCss, /height: min\(80rem, calc\(100vh - 2rem\)\)/);
   assert.match(widgetCss, /#e8bf8c 0%, #91694a 100%/);
-  assert.match(widget, /class="operator-bar"/);
+  assert.ok(widget.indexOf('id="operator"') < widget.indexOf('id="clear"'));
   assert.ok(widget.indexOf('id="operator"') < widget.indexOf('id="log"'));
   assert.match(widgetCss, /\.panel-head[\s\S]*#e8bf8c 0%, #91694a 100%/);
   assert.doesNotMatch(widget, /id="thread"/);

@@ -59,6 +59,8 @@ function renderFixture(t) {
     observing: false, recovery: "changed", issues: ["budget_over"],
     turns: [{
       started_at: "2026-11-27T10:00:00Z", mode: "functional", outcome: "partial",
+      result_kind: "price_near", request_text: "Кибер Бэкап до 90 тысяч",
+      answer_text: "Товара в вашем ценовом диапазоне нет, но можем предложить решения до 40% выше указанной цены.",
       clarification: true, filter_keys: ["price_minor"], filter_changes: { added: ["price_minor"], replaced: [], removed: [] },
       budgets: [budget], impression_recorded: true, feedback: "useful", issues: ["budget_over"],
       offers: [{
@@ -113,6 +115,8 @@ test("аналитика показывает когорту и метрики, 
   assert.doesNotMatch(details.textContent, /Альтернативный оффер/);
   details.open = true;
   details.listeners.toggle();
+  assert.match(details.textContent, /Кибер Бэкап до 90 тысяч/);
+  assert.match(details.textContent, /можем предложить решения до 40%/);
   assert.match(details.textContent, /Бюджет до 90\s000\s₽/);
   assert.match(details.textContent, /Превышение на 13\s236\s₽/);
   assert.match(details.textContent, /Альтернативный оффер/);

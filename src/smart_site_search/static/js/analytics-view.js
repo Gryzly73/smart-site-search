@@ -2,13 +2,22 @@ import { analyticsRows } from "./model.js";
 
 const NUMBER = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
 const PERCENT = new Intl.NumberFormat("ru-RU", { style: "percent", maximumFractionDigits: 1 });
-const TIMESTAMP = new Intl.DateTimeFormat("ru-RU", { dateStyle: "short", timeStyle: "short", timeZone: "UTC" });
-const DATE = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short", timeZone: "UTC" });
+const TIMESTAMP = new Intl.DateTimeFormat("ru-RU", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Moscow" });
+const DATE = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short", timeZone: "Europe/Moscow" });
 
 const MODES = {
   direct: "Прямой",
   functional: "Функциональный",
   expert: "Экспертный",
+};
+const RESULT_KINDS = {
+  exact: "Сразу показали подходящий товар",
+  price_near: "Предложили вариант дороже, но не больше чем на 40%",
+  characteristic_near: "Предложили ближайший вариант по характеристике",
+  unavailable: "Прямо сказали, что подходящего товара нет",
+  clarification: "Остановились на уточняющем вопросе",
+  partial: "Показали товары, но не все условия сошлись",
+  other: "Итог ещё не подтверждён",
 };
 const OUTCOMES = {
   full: "Полное совпадение",
@@ -47,6 +56,8 @@ const ISSUES = {
   request_interrupted: "Запрос прерван",
   repeated_problem: "Проблема повторилась",
   budget_over: "Есть вариант дороже бюджета",
+  explicit_budget_unmet: "Явный лимит цены не выполнен",
+  explicit_constraint_unmet: "Явное условие не выполнено",
   budget_unknown: "Стоимость не подтверждена",
   budget_unconfirmed: "Стоимость не подтверждена",
   budget_within_alternative: "Вариант в бюджете с отличиями",
@@ -235,7 +246,7 @@ function legacyOverview(cohort, mode) {
 
 function trendTable(trend) {
   const peak = trend.reduce((max, day) => Math.max(max, day.topics), 1);
-  return table(["День, UTC", "Темы", "С первого ответа", "Восстановились"], trend.map((day) => {
+  return table(["День, Москва", "Темы", "С первого ответа", "Восстановились"], trend.map((day) => {
     const activity = element("div", null, "analytics-activity");
     const meter = element("meter");
     meter.min = 0;
@@ -247,24 +258,38 @@ function trendTable(trend) {
   }));
 }
 
+function customerSummary(section, dialogues) {
+  const rows = dialogues.summary ?? [];
+  if (!rows.length) return;
+  section.append(element("h3", "Что получил покупатель"));
+  const cards = element("div", null, "analytics-kpis");
+  for (const row of rows) {
+    const card = element("div", null, "analytics-kpi");
+    card.append(
+      element("span", RESULT_KINDS[row.kind] ?? row.kind, "analytics-kpi-label"),
+      element("strong", NUMBER.format(row.count)),
+    );
+    cards.append(card);
+  }
+  section.append(cards);
+  const examples = dialogues.examples ?? [];
+  if (!examples.length) return;
+  section.append(element("h3", "Как это выглядело для покупателя"));
+  for (const example of examples) {
+    const block = element("article", null, "analytics-example");
+    block.append(element("h4", RESULT_KINDS[example.result_kind] ?? "Пример"));
+    if (example.request_text) block.append(element("p", `Запрос: ${example.request_text}`));
+    if (example.answer_text) block.append(element("p", example.answer_text));
+    if (example.product_name) block.append(element("p", `Показан товар: ${example.product_name}`, "fine"));
+    section.append(block);
+  }
+}
+
 function overview(section, cohort, dialogues, mode) {
   if (dialogues) {
     const metrics = dialogues.metrics.map((entry) => ({ id: entry.metric_id, ...entry.metric }));
-    const headlineIds = ["topics", "first_full_rate", "recovery_rate", "helpful_rate"];
-    const cards = element("div", null, "analytics-kpis");
-    for (const id of headlineIds) {
-      const metric = metrics.find((entry) => entry.id === id);
-      if (!metric) continue;
-      const card = element("div", null, "analytics-kpi");
-      card.append(
-        element("span", label(METRICS, id), "analytics-kpi-label"),
-        element("strong", metricValue(metric)),
-      );
-      const sample = fraction(metric);
-      if (sample) card.append(element("span", sample, "fine"));
-      cards.append(card);
-    }
-    section.append(cards, note(`Окно наблюдения — ${dialogues.observation_minutes} мин с первого запроса темы.`));
+    customerSummary(section, dialogues);
+    section.append(note(`Окно наблюдения — ${dialogues.observation_minutes} мин с первого запроса темы.`));
     if (dialogues.unattributed_requests > 0) {
       section.append(note(`Запросы без определённой темы — ${NUMBER.format(dialogues.unattributed_requests)}.`));
     }
@@ -280,7 +305,7 @@ function overview(section, cohort, dialogues, mode) {
 
 function dateTime(value) {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "Дата неизвестна" : `${TIMESTAMP.format(date)} UTC`;
+  return Number.isNaN(date.getTime()) ? "Дата неизвестна" : TIMESTAMP.format(date);
 }
 
 function outcome(key) {
@@ -315,6 +340,9 @@ function turnView(turn, position) {
   entry.append(line);
   const fields = element("dl", null, "analytics-facts");
   const filterNames = (keys) => keys.map((key) => label(FILTERS, key)).join(", ");
+  info(fields, "Запрос", turn.request_text);
+  info(fields, "Ответ", turn.answer_text);
+  info(fields, "Итог", RESULT_KINDS[turn.result_kind] ?? "");
   info(fields, "Режим", label(MODES, turn.mode));
   info(fields, "Уточнение", turn.clarification ? "В ответе был уточняющий вопрос" : "");
   info(fields, "Условия", filterNames(turn.filter_keys));
@@ -333,7 +361,7 @@ function turnView(turn, position) {
 function topicView(topic) {
   const needs = (topic.role_ids.length ? topic.role_ids : topic.class_ids).map((key) => label(NEEDS, key));
   const firstCard = topic.turns.find((turn) => turn.offers.length)?.offers[0].card_name;
-  const title = needs.join(", ") || firstCard || `Тема ${topic.topic_id.slice(0, 8)}`;
+  const title = topic.turns[0]?.request_text || needs.join(", ") || firstCard || `Тема ${topic.topic_id.slice(0, 8)}`;
   const details = element("details", null, "analytics-topic");
   const summary = element("summary");
   const summaryBody = element("span", null, "analytics-topic-overview");

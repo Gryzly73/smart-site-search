@@ -76,6 +76,16 @@
   background: var(--sheet);
 }
 
+.analytics-example {
+  margin: 0.55rem 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.analytics-example h4 { margin: 0 0 0.35rem; font-size: 1rem; }
+.analytics-example p { margin: 0.2rem 0; }
+
 .analytics-kpi-label { color: var(--muted); font-size: 0.9rem; }
 .analytics-kpi strong { color: var(--teal-ink); font-size: clamp(1.25rem, 3vw, 1.9rem); }
 

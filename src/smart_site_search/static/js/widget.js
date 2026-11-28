@@ -33,11 +33,12 @@ close.addEventListener("click", () => setOpen(false));
 clear.addEventListener("click", () => resetDialog());
 operator.addEventListener("click", () => {
   operator.disabled = true;
-  if (operator.nextElementSibling?.classList.contains("operator-note")) return;
+  if (log.querySelector(".operator-note")) return;
   const note = document.createElement("p");
   note.className = "fine operator-note";
   note.textContent = "Оператор в этой проверке не подключается. Диалог с поиском продолжается.";
-  operator.after(note);
+  log.append(note);
+  log.scrollTop = log.scrollHeight;
 });
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -83,7 +84,6 @@ function resetDialog() {
   state.impressed = new Set();
   log.replaceChildren(welcome);
   operator.disabled = false;
-  operator.parentElement?.querySelector(".operator-note")?.remove();
   syncClear();
   setBusy(false);
   query.focus();
@@ -157,12 +157,25 @@ function paint(bubble) {
     question.textContent = stored.view.clarificationQuestion;
     bubble.append(question);
   }
-  if (board.cards.length) bubble.append(cardRow(board.cards));
-  if (board.companions.length) {
-    const heading = document.createElement("p");
-    heading.className = "fine";
-    heading.textContent = "Также дополнительно можем вам предложить...";
-    bubble.append(heading, cardRow(board.companions));
+  const constraintNotes = (stored.view.warnings || []).filter((warning) =>
+    warning.startsWith("Товара в вашем ценовом диапазоне нет")
+    || warning.startsWith("Точного совпадения по условию")
+    || warning.startsWith("В каталоге нет товара")
+    || warning.startsWith("Указанные условия по каталогу")
+    || warning.startsWith("Бюджет комплекта"));
+  for (const warning of constraintNotes) {
+    const note = document.createElement("p");
+    note.className = "budget-note";
+    note.textContent = warning;
+    bubble.append(note);
+  }
+  if (board.cards.length) {
+    const priceShelf = constraintNotes.some((warning) => warning.includes("до 40%"));
+    const closestShelf = constraintNotes.some((warning) => warning.startsWith("Точного совпадения"));
+    const cards = priceShelf || closestShelf
+      ? board.cards.map((card) => ({ ...card, status: priceShelf ? "Выше бюджета" : "Ближайший вариант" }))
+      : board.cards;
+    bubble.append(cardRow(cards));
   }
   if (board.remaining > 0) {
     const more = document.createElement("button");
@@ -174,6 +187,12 @@ function paint(bubble) {
       paint(bubble);
     });
     bubble.append(more);
+  }
+  if (board.companions.length) {
+    const heading = document.createElement("p");
+    heading.className = "extra-heading";
+    heading.textContent = "Также дополнительно можем вам предложить...";
+    bubble.append(heading, cardRow(board.companions));
   }
 }
 

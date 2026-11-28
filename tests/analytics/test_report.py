@@ -69,10 +69,12 @@ def test_usage_and_funnel_keep_mock_orders_out_of_real_conversion(tmp_path):
     assert not mock.costs_by_mode
 
 
-def test_analytics_endpoint_lists_topics_and_filters_without_transcript(tmp_path):
+def test_analytics_endpoint_lists_topics_and_shows_the_customer_result(tmp_path):
     settings = replace(Settings.from_env(), runtime_path=tmp_path / "report.sqlite", external_llm_enabled=False)
     sample = SearchResponse.model_validate_json((FIXTURES / "search-functional.json").read_text(encoding="utf-8"))
     private_text = "dialogue-transcript-is-not-a-report-field"
+    customer_query = "Нужен сервер до 100000"
+    customer_answer = "Вы ищете оборудование или программное обеспечение?"
     start = datetime.now(UTC) - timedelta(minutes=1)
 
     with TestClient(create_app(settings)) as client:
@@ -80,7 +82,7 @@ def test_analytics_endpoint_lists_topics_and_filters_without_transcript(tmp_path
         original_ids = []
         for mode in ("direct", "functional", "direct"):
             request = SearchRequest(schema_version="1.0", client_request_id=uuid4(),
-                                    expected_revision=0, query=private_text)
+                                    expected_revision=0, query=customer_query)
             request_id, state = store.start(request, "catalog-v1", "tax-v1")
             original_ids.extend((request_id, state.session_id, state.topic_id))
             store.emit(request_id, state, "interpretation_completed", {"mode": mode, "role_ids": ["backup_restore"]})
@@ -88,7 +90,8 @@ def test_analytics_endpoint_lists_topics_and_filters_without_transcript(tmp_path
             store.emit(request_id, state, "search_issue", {"code": "missing_attributes", "evidence_status": "observed"})
             response = sample.model_copy(update={
                 "request_id": request_id, "session_id": state.session_id, "mode": mode,
-                "interpreted_goal": private_text, "clarification_question": private_text,
+                "interpreted_goal": customer_query, "clarification_question": customer_answer,
+                "trace_url": f"/api/{private_text}",
                 "primary_outcome": "partial", "provenance": sample.provenance.model_copy(
                     update={"catalog_data": "provided"}
                 ),
@@ -108,6 +111,8 @@ def test_analytics_endpoint_lists_topics_and_filters_without_transcript(tmp_path
         assert topic["mode"] == "direct" and topic["observing"]
         turn, = topic["turns"]
         assert turn["clarification"] and "missing_attributes" in topic["issues"]
+        assert turn["request_text"] == customer_query
+        assert turn["answer_text"] == customer_answer
         assert private_text not in response.text
         assert all(identifier not in response.text for identifier in original_ids)
         assert client.get("/api/v1/analytics", params=params | {"offset": -1}).status_code == 422

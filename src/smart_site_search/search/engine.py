@@ -148,6 +148,8 @@ def _retrieve(catalog, query, deadline, emit, *, cap, component_id=None, desired
                 break
             if targets and candidate.card_id not in targets:
                 continue
+            if (query.role_ids or query.class_ids) and candidate.relevance != "confirmed":
+                continue
             card = catalog.get_card(candidate.card_id)
             if card is None:
                 continue

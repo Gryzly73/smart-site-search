@@ -14,7 +14,8 @@ from .interpretation import Interpreter, Pricing
 from .interpretation.rules import norm, unsupported_measurements
 from .search import collect_matches
 from .search.companions import select_companions, vendor_section_url
-from .search.verify import budget_fit, is_budget_ceiling
+from .search.constraints import apply_explicit_constraints
+from .search.verify import budget_fit, is_budget_ceiling, misses_stated_requirement
 from .session import reduce_context
 from .settings import Settings
 from .telemetry import ApiError, RuntimeStore
@@ -123,6 +124,7 @@ def _search(req, catalog, store, settings, request_id, state):
     matches = collect_matches(catalog, effective_query, plan, start + 25, emit,
                               limit=req.limit, seen_card_ids=seen)
     items = {}
+    primary_items = []
     for match in matches.primary:
         card_id = match.candidate.card_id
         if card_id in items:
@@ -131,13 +133,22 @@ def _search(req, catalog, store, settings, request_id, state):
                     and items[card_id].selected_offer_id == match.selected_offer.offer_id
                     and component not in items[card_id].component_ids):
                 items[card_id].component_ids.append(component)
-        elif len(items) < req.limit:
-            items[card_id] = _item(catalog, match, query)
+            continue
+        items[card_id] = _item(catalog, match, query)
+        primary_items.append(items[card_id])
+    decision = apply_explicit_constraints(primary_items, query.filters)
+    primary_items = decision.items[:req.limit]
+    related_items = []
+    shown = {item.card_id for item in primary_items}
     for related in matches.related:
-        if len(items) < req.limit:
-            items.setdefault(related.verified.candidate.card_id, _item(catalog, related.verified, query, related))
+        card_id = related.verified.candidate.card_id
+        if card_id in shown or len(primary_items) + len(related_items) >= req.limit:
+            continue
+        related_items.append(_item(catalog, related.verified, query, related))
+        shown.add(card_id)
     groups = {"primary_full": 0, "primary_partial": 1, "related": 2}
-    results = sorted(items.values(), key=lambda item: groups[item.group])
+    results = sorted([*primary_items, *related_items], key=lambda item: groups[item.group])
+    items = {item.card_id: item for item in results}
     companions = _companions(catalog, results)
     counts = Counts(**{key: sum(i.group == key for i in results) for key in Counts.model_fields})
     degraded = intent.interpretation_source == "degraded_rules" or (query.mode == "expert" and not plan)
@@ -149,8 +160,8 @@ def _search(req, catalog, store, settings, request_id, state):
                    else "partial" if counts.primary_full or counts.primary_partial else "none")
     elif not results and (intent.clarification_question or degraded or matches.truncated):
         outcome = "undetermined"
-    warnings = []
-    if not counts.primary_full and any(item.budget_status in {"within", "over"} for item in results):
+    warnings = list(decision.notes)
+    if not decision.notes and not counts.primary_full and any(item.budget_status in {"within", "over"} for item in results):
         warnings.append("В проверенных предложениях не подтвердилось полное совпадение в пределах бюджета.")
     warnings.extend(f"Условие «{value}» пока не проверяется по каталогу."
                     for value in unsupported_measurements(req.query))
@@ -175,10 +186,18 @@ def _search(req, catalog, store, settings, request_id, state):
              for check in item.unmet_conditions), "missing_attributes"),
         ("unmapped_need" in query.unresolved_constraints, "need_unmapped"),
         (matches.truncated, "candidate_limit"),
+        (decision.price_unmet, "explicit_budget_unmet"),
+        (bool(decision.unmet_filter_ids), "explicit_constraint_unmet"),
     ):
         if condition:
+            affected = {
+                "explicit_budget_unmet": [f.filter_id for f in query.filters
+                                          if is_budget_ceiling(f) and f.key == "price_minor"],
+                "explicit_constraint_unmet": decision.unmet_filter_ids,
+            }
             emit("search_issue", {"code": code, "scope": "request", "evidence_status": "observed",
-                                  "affected_filter_ids": [], "candidate_count": len(matches.primary)})
+                                  "affected_filter_ids": affected.get(code, []),
+                                  "candidate_count": len(matches.primary)})
     visible = set(items)
     for component in matches.components:
         component.full_card_ids = [card_id for card_id in component.full_card_ids if card_id in visible]
@@ -289,7 +308,7 @@ def _budget_alternative(catalog, filters, match, status):
     opposite = "over" if status == "within" else "within"
     for offer in match.alternate_offers:
         alternative_status, difference = budget_fit(filters, offer)
-        if alternative_status != opposite:
+        if alternative_status != opposite or misses_stated_requirement(filters, offer.conditions):
             continue
         record = catalog.get_offer(offer.offer_id)
         if record is None:

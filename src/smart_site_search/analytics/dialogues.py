@@ -4,12 +4,24 @@ import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from statistics import median
 
 
+MOSCOW = timezone(timedelta(hours=3))
 OBSERVATION_MINUTES = 30
+MODE_NAMES = {"direct", "functional", "expert"}
+ANSWER_NOTES = (
+    "Товара в вашем ценовом диапазоне нет",
+    "Точного совпадения по условию",
+    "В каталоге нет товара",
+    "Указанные условия по каталогу",
+    "Бюджет комплекта",
+)
+RESULT_KINDS = (
+    "exact", "price_near", "characteristic_near", "unavailable", "clarification", "partial", "other",
+)
 OBSERVATION = timedelta(minutes=OBSERVATION_MINUTES)
 MODES = {"direct", "functional", "expert"}
 OUTCOMES = {"full", "partial", "none", "undetermined"}
@@ -28,6 +40,8 @@ RECOMMENDATIONS = {
     "need_unmapped": "Проверить, поддерживает ли словарь ролей формулировку потребности.",
     "no_candidates": "Проверить покрытие каталога и этап поиска кандидатов.",
     "no_matching_offer": "Сопоставить обязательные условия с доступными вариантами.",
+    "explicit_budget_unmet": "Явный ценовой лимит не выполнен ни одним показанным товаром.",
+    "explicit_constraint_unmet": "Явное условие запроса не выполнено ни одним товаром основной выдачи.",
     "repeated_problem": "Посмотреть, менялись ли результаты поиска при тех же обязательных условиях.",
     "request_interrupted": "Проверить серверные прерывания запроса.",
     "technical_error": "Проверить технический сбой запроса.",
@@ -187,6 +201,54 @@ def _budget_observations(budget_ids, offers, items, outcome):
     return tags, overages
 
 
+def _request_text(response):
+    goal = str(response.get("interpreted_goal") or "").strip()
+    internal = goal.casefold() in MODE_NAMES or re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)+", goal.casefold())
+    if goal and not internal:
+        return goal[:300]
+    parts = []
+    for item in response.get("applied_filters") or []:
+        text = str(item.get("source_text") or "").strip()
+        if text and text not in parts:
+            parts.append(text)
+    return " · ".join(parts)[:300]
+
+
+def _answer_text(response, outcome):
+    notes = [warning for warning in response.get("warnings") or []
+             if str(warning).startswith(ANSWER_NOTES)]
+    if notes:
+        return " ".join(notes)[:500]
+    question = str(response.get("clarification_question") or "").strip()
+    if question:
+        return question[:300]
+    if outcome == "full":
+        return "Показаны товары, которые подошли по запросу."
+    if outcome == "none":
+        return "Подходящий товар не показан."
+    if outcome == "partial":
+        return "Показаны товары, у которых не сошлись все условия запроса."
+    return ""
+
+
+def _result_kind(response, outcome, clarification):
+    text = " ".join(str(warning) for warning in response.get("warnings") or [])
+    if "можем предложить решения до 40%" in text:
+        return "price_near"
+    if "ближайшие варианты" in text:
+        return "characteristic_near"
+    if ("Товара в вашем ценовом диапазоне нет." in text or "В каталоге нет товара" in text
+            or outcome == "none"):
+        return "unavailable"
+    if clarification and outcome != "full":
+        return "clarification"
+    if outcome == "full":
+        return "exact"
+    if outcome == "partial":
+        return "partial"
+    return "other"
+
+
 def _turn(row, events, previous_filters):
     context = _latest(events, "context_applied")
     intent = _latest(events, "interpretation_completed")
@@ -221,9 +283,12 @@ def _turn(row, events, previous_filters):
     else:
         issues.update(tags.intersection({"budget_over", "budget_unknown"}))
     feedback = _latest(events, "feedback").get("rating")
+    clarification = bool(response.get("clarification_question"))
     detail = {
         "started_at": row["started_at"], "mode": _mode(response.get("mode") or intent.get("mode")),
-        "outcome": outcome, "clarification": bool(response.get("clarification_question")),
+        "outcome": outcome, "result_kind": _result_kind(response, outcome, clarification),
+        "request_text": _request_text(response), "answer_text": _answer_text(response, outcome),
+        "clarification": clarification,
         "filter_keys": _codes(current.values()), "filter_changes": changes,
         "budgets": [value for _, value in budget_filters], "offers": offers,
         "impression_recorded": any(event["payload"].get("visible_items") for _, event in events
@@ -268,7 +333,8 @@ def _topic(identifier, rows, started, data):
             later.detail["issues"] = sorted({*later.detail["issues"], "repeated_problem"})
     report = {
         "topic_id": sha256(identifier.encode()).hexdigest()[:16], "started_at": started.isoformat(),
-        "mode": first.detail["mode"], "first_outcome": outcomes[0], "last_outcome": outcomes[-1],
+        "mode": first.detail["mode"], "result_kind": first.detail["result_kind"],
+        "first_outcome": outcomes[0], "last_outcome": outcomes[-1],
         "observing": data.generated_at < deadline, "recovery": recovery,
         "role_ids": sorted({role for turn in turns for role in turn.role_ids}),
         "class_ids": sorted({cls for turn in turns for cls in turn.class_ids}),
@@ -310,7 +376,7 @@ def build_dialogue_report(data, cohort, *, mode, issue, offset, limit):
             continue
         topics.append(topic)
         problems.update(topic["issues"])
-        daily = trend[started.date().isoformat()]
+        daily = trend[started.astimezone(MOSCOW).date().isoformat()]
         daily["topics"] += 1
         if topic["first_outcome"] in CHECKED_OUTCOMES:
             counts["first_checked"] += 1
@@ -354,6 +420,25 @@ def build_dialogue_report(data, cohort, *, mode, issue, offset, limit):
     metrics = _metrics(counts, overages, len(topics), cohort)
     eligible = [topic for topic in topics if not issue or issue in topic["issues"]]
     eligible.sort(key=lambda topic: (topic["started_at"], topic["topic_id"]), reverse=True)
+    counted = Counter(topic["result_kind"] for topic in eligible)
+    examples = []
+    for kind in ("price_near", "characteristic_near", "unavailable", "exact"):
+        sample = next((
+            topic for topic in eligible
+            if topic["result_kind"] == kind and topic["turns"][0]["request_text"].strip()
+            and (kind != "exact" or (
+                not topic["turns"][0]["clarification"]
+                and topic["turns"][0]["answer_text"].startswith("Показаны товары")
+            ))
+        ), None)
+        if sample is None:
+            continue
+        turn = sample["turns"][0]
+        product = next((offer["card_name"] for offer in turn["offers"] if offer.get("card_name")), None)
+        examples.append({
+            "topic_id": sample["topic_id"], "started_at": sample["started_at"], "result_kind": kind,
+            "request_text": turn["request_text"], "answer_text": turn["answer_text"], "product_name": product,
+        })
     return {
         "observation_minutes": OBSERVATION_MINUTES, "unattributed_requests": unattributed,
         "topics_total": len(topics), "filtered_total": len(eligible), "offset": offset, "limit": limit,
@@ -362,6 +447,8 @@ def build_dialogue_report(data, cohort, *, mode, issue, offset, limit):
                   for date, counts in sorted(trend.items())],
         "problems": [{"code": code, "count": count, "recommendation": RECOMMENDATIONS[code]}
                      for code, count in problems.most_common()],
+        "summary": [{"kind": kind, "count": counted[kind]} for kind in RESULT_KINDS if counted[kind]],
+        "examples": examples,
         "topics": eligible[offset:offset + limit],
     }
 
