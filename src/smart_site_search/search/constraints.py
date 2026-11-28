@@ -28,6 +28,90 @@ def closest_note(source: str) -> str:
     return f"Точного совпадения по условию «{source}» нет, можем предложить ближайшие варианты."
 
 
+def filter_applies(filter_, *, role_ids, component_id) -> bool:
+    """A stated condition belongs to the component it names, not to the whole kit."""
+    if filter_.key.startswith("vram_"):
+        return "gpu" in role_ids
+    source = filter_.source_text.casefold()
+    if filter_.key == "available" and any(token in source for token in ("gpu", "видеокарт", "ускорител")):
+        return "gpu" in role_ids
+    return filter_.component_id in (None, component_id)
+
+
+def constrain_components(items, component_filters, topic_filters) -> ConstraintDecision:
+    """Keep each expert component subject only to the conditions that apply to it."""
+    surviving = {}
+    notes = []
+    unmet = []
+    price_unmet = False
+    assigned = set()
+    for component_id, filters in component_filters.items():
+        own = [item for item in items if component_id in item.component_ids]
+        assigned.update(item.card_id for item in own)
+        decision = apply_explicit_constraints(own, filters)
+        for item in decision.items:
+            if item.group != "related":
+                surviving[item.card_id] = item
+        for note in decision.notes:
+            if note not in notes:
+                notes.append(note)
+        for filter_id in decision.unmet_filter_ids:
+            if filter_id not in unmet:
+                unmet.append(filter_id)
+        price_unmet = price_unmet or decision.price_unmet
+    orphans = [item for item in items if item.group != "related" and item.card_id not in assigned]
+    if orphans:
+        decision = apply_explicit_constraints(orphans, topic_filters)
+        for item in decision.items:
+            if item.group != "related":
+                surviving[item.card_id] = item
+        for note in decision.notes:
+            if note not in notes:
+                notes.append(note)
+        for filter_id in decision.unmet_filter_ids:
+            if filter_id not in unmet:
+                unmet.append(filter_id)
+        price_unmet = price_unmet or decision.price_unmet
+    ordered = [surviving[item.card_id] for item in items if item.card_id in surviving]
+    if ordered:
+        notes = [note for note in notes if note not in {CATALOG_EMPTY, PRICE_EMPTY}]
+    return ConstraintDecision(ordered, notes, price_unmet, unmet)
+
+
+def interleave_components(items, limit):
+    """Keep a card from every remaining kit part on the first page."""
+    if limit <= 0:
+        return []
+    groups = {}
+    order = []
+    for item in items:
+        if item.group == "related":
+            continue
+        component_id = item.component_ids[0] if item.component_ids else ""
+        if component_id not in groups:
+            order.append(component_id)
+            groups[component_id] = []
+        groups[component_id].append(item)
+    if len(order) < 2:
+        return [item for item in items if item.group != "related"][:limit]
+    chosen = []
+    seen = set()
+    for component_id in order:
+        group = groups[component_id]
+        lead = next((item for item in group if item.group == "primary_partial"), group[0])
+        if lead.card_id in seen or len(chosen) >= limit:
+            continue
+        chosen.append(lead)
+        seen.add(lead.card_id)
+    for group_name in ("primary_partial", "primary_full"):
+        for item in items:
+            if item.group != group_name or item.card_id in seen or len(chosen) >= limit:
+                continue
+            chosen.append(item)
+            seen.add(item.card_id)
+    return chosen
+
+
 def apply_explicit_constraints(results: list[ResultItem], filters) -> ConstraintDecision:
     related = [item for item in results if item.group == "related"]
     primary = [item for item in results if item.group != "related"]

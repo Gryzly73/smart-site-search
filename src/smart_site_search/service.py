@@ -14,7 +14,7 @@ from .interpretation import Interpreter, Pricing
 from .interpretation.rules import norm, unsupported_measurements
 from .search import collect_matches
 from .search.companions import select_companions, vendor_section_url
-from .search.constraints import apply_explicit_constraints
+from .search.constraints import apply_explicit_constraints, constrain_components, interleave_components
 from .search.verify import budget_fit, is_budget_ceiling, misses_stated_requirement
 from .session import reduce_context
 from .settings import Settings
@@ -136,8 +136,12 @@ def _search(req, catalog, store, settings, request_id, state):
             continue
         items[card_id] = _item(catalog, match, query)
         primary_items.append(items[card_id])
-    decision = apply_explicit_constraints(primary_items, query.filters)
-    primary_items = decision.items[:req.limit]
+    if plan and matches.component_filters:
+        decision = constrain_components(primary_items, matches.component_filters, query.filters)
+        primary_items = interleave_components(decision.items, req.limit)
+    else:
+        decision = apply_explicit_constraints(primary_items, query.filters)
+        primary_items = decision.items[:req.limit]
     related_items = []
     shown = {item.card_id for item in primary_items}
     for related in matches.related:

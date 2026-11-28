@@ -4,7 +4,7 @@ from smart_site_search.contracts.intent import Filter
 from smart_site_search.contracts.search import ConditionCheck
 from smart_site_search.search.constraints import (
     CATALOG_EMPTY, KIT_BUDGET, PRICE_EMPTY, PRICE_STRETCH, UNVERIFIED, apply_explicit_constraints,
-    closest_note,
+    closest_note, constrain_components, interleave_components,
 )
 
 
@@ -24,11 +24,12 @@ def condition(filter_id, status, actual):
                           actual_values=[] if actual is None else [actual], source_refs=[])
 
 
-def item(card_id, *, group="primary_partial", status="over", amount=130, matched=(), unmet=()):
+def item(card_id, *, group="primary_partial", status="over", amount=130, matched=(), unmet=(),
+         components=()):
     return ResultItem(
         card_id=f"offer:{card_id}", name=card_id, vendor_names=[], kind="hardware", class_id="hardware",
         group=group, match_level="full" if group == "primary_full" else "partial",
-        component_ids=[], selected_offer_id=card_id,
+        component_ids=list(components), selected_offer_id=card_id,
         price=None if amount is None else Money(amount_minor=amount, currency="RUB"),
         price_label="", available=True, availability_label="", url=None, url_kind="none",
         matched_conditions=list(matched), unmet_conditions=list(unmet), reason="", caveats=[],
@@ -163,3 +164,64 @@ def test_unknown_characteristic_is_not_reported_as_an_empty_catalog():
     decision = apply_explicit_constraints(cards, [memory])
     assert ids(decision) == ["offer:unknown"]
     assert decision.notes == [UNVERIFIED]
+
+
+def test_kit_keeps_parts_that_were_not_given_the_memory_condition():
+    memory = spec("vram", "vram_gb", "gte", 48, "от 48 ГБ")
+    cards = [
+        item("runtime", status=None, amount=None, group="primary_full", components=["llm"]),
+        item("gpu", status=None, amount=None, components=["gpu"],
+             unmet=[condition("vram", "mismatch", 24)]),
+    ]
+    decision = constrain_components(cards, {"llm": [], "gpu": [memory]}, [memory])
+    assert ids(decision) == ["offer:runtime", "offer:gpu"]
+    assert decision.notes == [closest_note("от 48 ГБ")]
+    assert CATALOG_EMPTY not in decision.notes
+    assert decision.unmet_filter_ids == ["vram"]
+
+
+def test_kit_price_limit_does_not_hide_parts_inside_the_budget():
+    limit = ceiling(100)
+    cards = [
+        item("runtime", status="within", amount=80, group="primary_full", components=["llm"]),
+        item("gpu", amount=141, components=["gpu"]),
+    ]
+    decision = constrain_components(cards, {"llm": [limit], "gpu": [limit]}, [limit])
+    assert ids(decision) == ["offer:runtime"]
+    assert decision.notes == []
+    assert decision.price_unmet is True
+
+
+def test_kit_price_shelf_stays_beside_parts_inside_the_budget():
+    limit = ceiling(100)
+    cards = [
+        item("runtime", status="within", amount=80, group="primary_full", components=["llm"]),
+        item("gpu", amount=140, components=["gpu"]),
+    ]
+    decision = constrain_components(cards, {"llm": [limit], "gpu": [limit]}, [limit])
+    assert ids(decision) == ["offer:runtime", "offer:gpu"]
+    assert decision.notes == [PRICE_STRETCH]
+    assert decision.price_unmet is True
+
+
+def test_empty_kit_still_reports_that_no_product_meets_the_stated_conditions():
+    organization = spec("org", "organization", "eq", "commercial", "коммерческая организация")
+    cards = [
+        item("runtime", status=None, amount=None, components=["llm"],
+             unmet=[condition("org", "mismatch", "academic")]),
+        item("gpu", status=None, amount=None, components=["gpu"],
+             unmet=[condition("org", "mismatch", "academic")]),
+    ]
+    decision = constrain_components(cards, {"llm": [organization], "gpu": [organization]}, [organization])
+    assert ids(decision) == []
+    assert decision.notes == [CATALOG_EMPTY]
+
+
+def test_first_page_keeps_a_card_from_each_remaining_kit_part():
+    cards = [item(f"os-{number}", status=None, amount=None, group="primary_full", components=["os"])
+             for number in range(8)]
+    cards.append(item("gpu", status=None, amount=None, components=["gpu"]))
+    cards.extend(item(name, components=["gpu"]) for name in ("gpu-a", "gpu-b"))
+    page = interleave_components(cards, 8)
+    assert {card.card_id for card in page} >= {"offer:gpu", "offer:gpu-a", "offer:gpu-b"}
+    assert len(page) == 8

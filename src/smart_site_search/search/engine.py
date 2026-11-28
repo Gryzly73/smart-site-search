@@ -5,6 +5,7 @@ from ..catalog.normalization import NUMERIC_FILTER_KEYS
 from ..contracts.intent import ExpertPlan, QueryState
 from ..contracts.search import ComponentResult, RelatedResult, VerifiedCandidate
 from .companions import rule_for
+from .constraints import filter_applies
 from .verify import BUDGET_PRIORITY, budget_fit, is_budget_ceiling, numeric_distance, verify_card
 
 
@@ -13,6 +14,7 @@ class SearchMatches:
     primary: list[VerifiedCandidate] = field(default_factory=list)
     related: list[RelatedResult] = field(default_factory=list)
     components: list[ComponentResult] = field(default_factory=list)
+    component_filters: dict = field(default_factory=dict)
     truncated: bool = False
 
 
@@ -242,18 +244,14 @@ def collect_matches(catalog, query: QueryState, plan: ExpertPlan | None, deadlin
     elif plan is not None:
         groups = []
         for component in plan.components:
-            def applies(filter_, component=component):
-                if filter_.key.startswith("vram_"):
-                    return "gpu" in component.role_ids
-                if filter_.key == "available" and any(
-                    token in filter_.source_text.casefold() for token in ("gpu", "видеокарт", "ускорител")
-                ):
-                    return "gpu" in component.role_ids
-                return filter_.component_id in (None, component.component_id)
-
+            selected_filters = [item for item in query.filters if filter_applies(
+                item, role_ids=component.role_ids, component_id=component.component_id,
+            )]
+            selected_filters.extend(component.filters)
+            matches.component_filters[component.component_id] = selected_filters
             component_query = query.model_copy(update={
                 "role_ids": component.role_ids, "class_ids": [], "search_terms": component.search_terms,
-                "filters": [*[item for item in query.filters if applies(item)], *component.filters],
+                "filters": selected_filters,
                 "entities": [], "unresolved_constraints": query.unresolved_constraints,
             })
             verified, truncated = _retrieve(catalog, component_query, deadline, emit,
@@ -271,7 +269,8 @@ def collect_matches(catalog, query: QueryState, plan: ExpertPlan | None, deadlin
                                                   if partial else "В проверенной выборке подходящих позиций нет."),
                 compatibility_status="not_verified", compatibility_evidence=[],
             ))
-        matches.primary = _ordered_page(groups, limit)
+        verified_count = sum(len(items) for _reserve, items, _query in groups)
+        matches.primary = _ordered_page(groups, max(limit, verified_count))
     primary_ids = list(dict.fromkeys(item.candidate.card_id for item in matches.primary))
     emit("ranking_completed", {
         "ordered_card_ids": primary_ids[:limit],

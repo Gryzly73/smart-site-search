@@ -93,6 +93,11 @@ const METRICS = {
   degraded_rate: "Ответы в режиме деградации",
   errors_rate: "Ошибки запроса",
   trace_complete_rate: "Полнота трассы",
+  input_tokens: "Входные токены",
+  cached_input_tokens: "Кешированные входные токены",
+  output_tokens: "Выходные токены",
+  interpret_calls: "Вызовы интерпретации",
+  expert_plan_calls: "Вызовы плана",
   p50_ms: "Медианная задержка, мс",
   p95_ms: "95-й процентиль задержки, мс",
   order_conversion: "Конверсия в заказ",
@@ -206,12 +211,22 @@ function metricStatus(metric) {
   return element("span", labels[metric.availability] ?? "Нет данных", `tag ${metric.availability ?? "unavailable"}`);
 }
 
+function metricLabel(metric) {
+  if (metric.id.startsWith("median_over_budget_")) {
+    return `Медиана превышения, ${metric.id.slice("median_over_budget_".length).toUpperCase()}`;
+  }
+  const mean = /^mean_cost_(.+)_(rub|usd)$/.exec(metric.id);
+  if (mean) {
+    const vat = mean[2] === "rub" ? " с НДС" : "";
+    return `Средняя стоимость${vat}, ${label(MODES, mean[1])}, ${mean[2].toUpperCase()}`;
+  }
+  return label(METRICS, metric.id);
+}
+
 function metricsTable(metrics) {
   if (!metrics.length) return note("Метрик за период нет.");
   return table(["Показатель", "Значение", "Выборка", "Статус", "Определение"], metrics.map((metric) => [
-    metric.id.startsWith("median_over_budget_")
-      ? `Медиана превышения, ${metric.id.slice("median_over_budget_".length).toUpperCase()}`
-      : label(METRICS, metric.id),
+    metricLabel(metric),
     metricValue(metric), fraction(metric) || "—", metricStatus(metric),
     [metric.definition, ...(metric.limitations ?? [])].filter(Boolean).join(" "),
   ]));
@@ -236,12 +251,20 @@ function legacyOverview(cohort, mode) {
       issueLabel(gap.code), gap.count, gap.evidence_status, gap.recommendation,
     ])) : note("Пробелы в запросах за период не зафиксированы."),
     element("h3", "Экономика"),
-    cohort.costs.length ? table(["Режим", "Запросы", "Вызовы", "Известная стоимость", "Неизвестные вызовы"],
+    cohort.costs.length ? table(
+      ["Режим", "Запросы", "Вызовы", "С НДС", "Без НДС, пересчёт", "Неизвестные вызовы"],
       cohort.costs.map((cost) => [
-        label(MODES, cost.mode), cost.requests, cost.calls, `${cost.known_cost} ${cost.currency}`, cost.unknown_calls,
-      ])) : note("Расходы за период не зафиксированы."),
+        label(MODES, cost.mode), cost.requests, cost.calls,
+        `${cost.known_cost} ${cost.currency}`,
+        cost.known_cost_ex_vat ? `${cost.known_cost_ex_vat} ${cost.currency}` : "—",
+        cost.unknown_calls,
+      ]),
+    ) : note("Расходы за период не зафиксированы."),
+    cohort.costs.some((cost) => cost.currency === "RUB")
+      ? note("Сумма без НДС — это известная стоимость с НДС, делённая на 1,22 для калькулятора конкурса. Провайдер эту сумму отдельно не присылает.")
+      : null,
   ];
-  return disclosure(subhead, ...content);
+  return disclosure(subhead, ...content.filter(Boolean));
 }
 
 function trendTable(trend) {

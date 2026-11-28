@@ -69,6 +69,49 @@ def test_usage_and_funnel_keep_mock_orders_out_of_real_conversion(tmp_path):
     assert not mock.costs_by_mode
 
 
+def test_report_splits_model_calls_and_converts_known_rub_cost(tmp_path):
+    store = RuntimeStore(tmp_path / "runtime.sqlite")
+    req = SearchRequest.model_validate_json((FIXTURES / "search-request.json").read_text(encoding="utf-8"))
+    start = datetime.now(UTC) - timedelta(minutes=1)
+    request_id, state = store.start(req, "catalog-v1", "tax-v1")
+    store.emit(request_id, state, "interpretation_completed", {
+        "mode": "expert", "role_ids": ["gpu"],
+    })
+    for call_id, purpose, incoming, outgoing in (
+        ("interpret-1", "interpret", 100, 22),
+        ("plan-1", "expert_plan", 50, 10),
+    ):
+        store.emit(request_id, state, "llm_call_started", {"call_id": call_id, "purpose": purpose})
+        store.emit(request_id, state, "llm_call_completed", {
+            "call_id": call_id, "provider": "yandex", "model": "yandexgpt-5.1",
+            "purpose": purpose, "attempt": 1, "status": "success",
+            "input_tokens": incoming, "cached_input_tokens": 0, "output_tokens": outgoing,
+            "usage_source": "provider", "cost": "1.22", "currency": "RUB",
+            "cost_status": "calculated", "latency_ms": 10,
+        })
+    response = SearchResponse.model_validate_json(
+        (FIXTURES / "search-functional.json").read_text(encoding="utf-8")
+    )
+    response = response.model_copy(update={
+        "request_id": request_id, "session_id": state.session_id,
+        "catalog_version": state.catalog_version, "mode": "expert",
+        "provenance": response.provenance.model_copy(update={"catalog_data": "provided"}),
+    })
+    store.finish(response, state.model_copy(update={"revision": 1}))
+    cohort, = build_report(store, start, datetime.now(UTC) + timedelta(seconds=1), "real").cohorts
+    metrics = {item.metric_id: item.metric for item in cohort.metrics}
+    assert metrics["input_tokens"].value == 150
+    assert metrics["output_tokens"].value == 32
+    assert metrics["interpret_calls"].value == 1
+    assert metrics["expert_plan_calls"].value == 1
+    cost, = cohort.costs_by_mode
+    assert cost.currency == "RUB"
+    assert cost.calls == 2
+    assert cost.unknown_calls == 0
+    assert cost.known_cost == "2.44"
+    assert cost.known_cost_ex_vat == "2.000000"
+
+
 def test_analytics_endpoint_lists_topics_and_shows_the_customer_result(tmp_path):
     settings = replace(Settings.from_env(), runtime_path=tmp_path / "report.sqlite", external_llm_enabled=False)
     sample = SearchResponse.model_validate_json((FIXTURES / "search-functional.json").read_text(encoding="utf-8"))

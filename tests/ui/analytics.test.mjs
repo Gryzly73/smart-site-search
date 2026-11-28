@@ -127,6 +127,42 @@ test("аналитика показывает когорту и метрики, 
   assert.equal(offset, 25);
 });
 
+test("экономика показывает токены, вызовы и пересчёт суммы без НДС", (t) => {
+  const { root, payload } = renderFixture(t);
+  payload.cohorts[0].metrics = [
+    { metric_id: "input_tokens", metric: {
+      value: 150, numerator: null, denominator: null, availability: "measured", definition: "Сумма", limitations: [],
+    } },
+    { metric_id: "output_tokens", metric: {
+      value: 32, numerator: null, denominator: null, availability: "measured", definition: "Сумма", limitations: [],
+    } },
+    { metric_id: "interpret_calls", metric: {
+      value: 1, numerator: null, denominator: null, availability: "measured", definition: "Вызовы", limitations: [],
+    } },
+    { metric_id: "expert_plan_calls", metric: {
+      value: 1, numerator: null, denominator: null, availability: "measured", definition: "Вызовы", limitations: [],
+    } },
+    { metric_id: "mean_cost_expert_rub", metric: {
+      value: 2.44, numerator: null, denominator: null, availability: "measured", definition: "Средняя", limitations: [],
+    } },
+  ];
+  payload.cohorts[0].costs_by_mode = [{
+    mode: "expert", requests: 1, calls: 2, known_cost: "2.44", known_cost_ex_vat: "2.000000",
+    unknown_calls: 0, currency: "RUB",
+  }];
+  renderReport(root, payload, { mode: "all", issue: "", view: "overview" });
+  assert.match(root.textContent, /Входные токены/);
+  assert.match(root.textContent, /Выходные токены/);
+  assert.match(root.textContent, /Вызовы интерпретации/);
+  assert.match(root.textContent, /Вызовы плана/);
+  assert.match(root.textContent, /Средняя стоимость с НДС, Экспертный, RUB/);
+  assert.match(root.textContent, /С НДС/);
+  assert.match(root.textContent, /Без НДС, пересчёт/);
+  assert.match(root.textContent, /2\.44 RUB/);
+  assert.match(root.textContent, /2\.000000 RUB/);
+  assert.match(root.textContent, /делённая на 1,22/);
+});
+
 test("переход на вкладку повторяет запрос после ошибки первой загрузки", async (t) => {
   const { root, payload } = renderFixture(t);
   const originalFetch = globalThis.fetch;

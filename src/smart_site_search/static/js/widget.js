@@ -172,9 +172,12 @@ function paint(bubble) {
   if (board.cards.length) {
     const priceShelf = constraintNotes.some((warning) => warning.includes("до 40%"));
     const closestShelf = constraintNotes.some((warning) => warning.startsWith("Точного совпадения"));
-    const cards = priceShelf || closestShelf
-      ? board.cards.map((card) => ({ ...card, status: priceShelf ? "Выше бюджета" : "Ближайший вариант" }))
-      : board.cards;
+    const cards = board.cards.map((card) => {
+      if (!card.hasMismatch) return card;
+      if (priceShelf) return { ...card, status: "Выше бюджета" };
+      if (closestShelf) return { ...card, status: "Ближайший вариант" };
+      return card;
+    });
     bubble.append(cardRow(cards));
   }
   if (board.remaining > 0) {

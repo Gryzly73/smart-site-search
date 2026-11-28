@@ -43,6 +43,7 @@ class ModeCost(Contract):
     requests: int
     calls: int
     known_cost: str
+    known_cost_ex_vat: str | None = None
     unknown_calls: int
     currency: str
 

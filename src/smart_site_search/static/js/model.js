@@ -270,6 +270,7 @@ export function cardView(item, position, filters = new Map()) {
     urlRejected: Boolean(item.url) && !url,
     reason: item.reason ?? "",
     caveats: Array.isArray(item.caveats) ? item.caveats : [],
+    hasMismatch: unmet.some((check) => check.status === "mismatch"),
     ...conditionLabels(unmet, filters),
     budgetStatus: item.budget_status ?? null,
     budgetLabel: budgetLabel(item),
@@ -305,6 +306,7 @@ function widgetFace(item, status) {
     url: item.url || null,
     offerId: item.offerId || null,
     group: item.group || "",
+    hasMismatch: Boolean(item.hasMismatch),
     position: item.position ?? null,
   };
 }
@@ -409,12 +411,13 @@ export function costView(usage) {
     return { complete: false, text: "Стоимость не передана." };
   }
   const known = `${usage.cost_known ?? ""} ${usage.currency ?? ""}`.trim();
+  const vat = usage.currency === "RUB" ? " с НДС" : "";
   if (usage.cost_complete) {
-    return { complete: true, text: `Стоимость ${known}.` };
+    return { complete: true, text: `Стоимость ${known}${vat}.` };
   }
   return {
     complete: false,
-    text: `Известная часть ${known}. Учёт неполный: неизвестные вызовы не заменяются нулём.`,
+    text: `Известная часть ${known}${vat}. Учёт неполный: неизвестные вызовы не заменяются нулём.`,
   };
 }
 
@@ -446,6 +449,24 @@ export function impressionPayload(view) {
   };
 }
 
+const CALL_PURPOSES = {
+  interpret: "интерпретация",
+  expert_plan: "план",
+};
+
+function callDetail(event) {
+  if (event.event_type !== "llm_call_started" && event.event_type !== "llm_call_completed") return "";
+  const payload = event.payload ?? {};
+  const parts = [];
+  if (CALL_PURPOSES[payload.purpose]) parts.push(CALL_PURPOSES[payload.purpose]);
+  if (event.event_type === "llm_call_completed") {
+    if (payload.input_tokens != null) parts.push(`${payload.input_tokens} входных`);
+    if (payload.cached_input_tokens) parts.push(`${payload.cached_input_tokens} из кэша`);
+    if (payload.output_tokens != null) parts.push(`${payload.output_tokens} выходных`);
+  }
+  return parts.length ? `: ${parts.join(", ")}` : "";
+}
+
 export function traceSummary(events, usage) {
   const list = Array.isArray(events) ? [...events] : [];
   list.sort((left, right) => (left.seq ?? 0) - (right.seq ?? 0));
@@ -453,7 +474,7 @@ export function traceSummary(events, usage) {
   return {
     stages: list.map((event) => ({
       seq: event.seq,
-      label: STAGE_LABELS[event.event_type] || event.event_type || "Этап",
+      label: `${STAGE_LABELS[event.event_type] || event.event_type || "Этап"}${callDetail(event)}`,
     })),
     interpretationSource: interpretation?.payload?.interpretation_source ?? "",
     usage: costView(usage),

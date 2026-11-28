@@ -323,4 +323,23 @@ test("трасса показывает источник интерпретац�
   assert.deepEqual(summary.stages.map((stage) => stage.seq), [1, 2, 3]);
   assert.equal(summary.interpretationSource, "degraded_rules");
   assert.equal(summary.usage.complete, false);
+  assert.doesNotMatch(summary.usage.text, /НДС/);
+});
+
+test("трасса называет вызов, токены и рублёвую стоимость с НДС", () => {
+  const summary = traceSummary([
+    { seq: 1, event_type: "llm_call_started", payload: { purpose: "interpret" } },
+    { seq: 2, event_type: "llm_call_completed", payload: {
+      purpose: "interpret", input_tokens: 2287, cached_input_tokens: 12, output_tokens: 107,
+    } },
+    { seq: 3, event_type: "llm_call_started", payload: { purpose: "expert_plan" } },
+    { seq: 4, event_type: "retrieval_completed", payload: {} },
+    { seq: 5, event_type: "offer_verification_completed", payload: {} },
+  ], { cost_known: "4.16", currency: "RUB", cost_complete: true });
+  assert.equal(summary.stages[0].label, "Вызов модели: интерпретация");
+  assert.equal(summary.stages[1].label, "Ответ модели: интерпретация, 2287 входных, 12 из кэша, 107 выходных");
+  assert.equal(summary.stages[2].label, "Вызов модели: план");
+  assert.equal(summary.stages[3].label, "Поиск кандидатов");
+  assert.equal(summary.stages[4].label, "Проверка предложения");
+  assert.equal(summary.usage.text, "Стоимость 4.16 RUB с НДС.");
 });

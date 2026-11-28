@@ -9,6 +9,7 @@ from ..contracts.analytics import AnalyticsReport, Cohort, DialogueModeFilter, D
 from .dialogues import build_dialogue_report, is_mock, read_dialogue_rows
 
 
+VAT_DIVISOR = Decimal("1.22")
 RECOMMENDATIONS = {
     "missing_attributes": "Проверить данные по запрошенным характеристикам.",
     "no_matching_offer": "Проверить сочетания условий и ассортимент офферов.",
@@ -82,6 +83,7 @@ def _cohort(name, requests, events, dialogues):
     funnel_responses = set()
     latencies = []
     token_counts = defaultdict(list)
+    purposes = Counter()
     for request in requests:
         request_id, session = request["request_id"], request["session_id"]
         response = json.loads(request["response_json"]) if request["response_json"] else {}
@@ -122,6 +124,9 @@ def _cohort(name, requests, events, dialogues):
         for item in types["llm_call_started"]:
             usage = completed.get(item["payload"]["call_id"], {})
             calls[mode].append(usage)
+            purpose = usage.get("purpose") or item["payload"].get("purpose")
+            if purpose in {"interpret", "expert_plan"}:
+                purposes[purpose] += 1
             for key in ("input_tokens", "cached_input_tokens", "output_tokens"):
                 if usage.get(key) is not None:
                     token_counts[key].append(usage[key])
@@ -170,6 +175,10 @@ def _cohort(name, requests, events, dialogues):
         ("negative", "Доля отрицательных оценок среди запросов с обратной связью.", counts["feedback"]),
     ):
         metric(f"{key}_rate", definition, numerator=counts[key], denominator=base)
+    metric("interpret_calls", "Число внешних вызовов интерпретации запроса.",
+           value=purposes["interpret"] or None)
+    metric("expert_plan_calls", "Число внешних вызовов экспертного плана.",
+           value=purposes["expert_plan"] or None)
     call_count = sum(map(len, calls.values()))
     for key in ("input_tokens", "cached_input_tokens", "output_tokens"):
         values = token_counts[key]
@@ -184,9 +193,12 @@ def _cohort(name, requests, events, dialogues):
         for currency, amounts in sorted((by_currency or {"USD": []}).items()):
             known = sum((Decimal(value) for value in amounts if value is not None), Decimal(0))
             unknown_count = amounts.count(None)
+            ex_vat = None
+            if currency == "RUB":
+                ex_vat = format((known / VAT_DIVISOR).quantize(Decimal("0.000001")), "f")
             costs.append(ModeCost(mode=mode, requests=request_count, calls=len(amounts),
-                                  known_cost=format(known, "f"), currency=currency,
-                                  unknown_calls=unknown_count))
+                                  known_cost=format(known, "f"), known_cost_ex_vat=ex_vat,
+                                  currency=currency, unknown_calls=unknown_count))
             metric(f"mean_cost_{mode}_{currency.lower()}",
                    f"Средняя стоимость внешних вызовов на запрос в режиме {mode}, {currency}.",
                    value=float(known / request_count) if not unknown_count else None,
